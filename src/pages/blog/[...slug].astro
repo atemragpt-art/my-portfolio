@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutPost from '@/layouts/LayoutPost.astro';
+import Section from '@/components/ui/Section.astro';
+
+export async function getStaticPaths() {
+  const blogPosts = await getCollection('blog', ({ data }) => !data.draft);
+  return blogPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Awaited<ReturnType<typeof getCollection>>[number];
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<LayoutPost
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+>
+  <Section>
+    <article class="prose dark:prose-invert max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">{post.data.title}</h1>
+      {post.data.pubDate && (
+        <time class="text-gray-600 dark:text-gray-400 mb-6 block">
+          {post.data.pubDate.toLocaleDateString('ru-RU')}
+        </time>
+      )}
+      <Content />
+      {post.data.tags.length > 0 && (
+        <div class="mt-8 flex flex-wrap gap-2">
+          {post.data.tags.map((tag) => (
+            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </article>
+  </Section>
+</LayoutPost>

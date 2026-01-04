@@ -1,0 +1,18 @@
+---
+import LayoutMain from './LayoutMain.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<LayoutMain title={title} description={description}>
+  <main>
+    <div class="container mx-auto py-8 px-4 max-w-4xl">
+      <slot />
+    </div>
+  </main>
+</LayoutMain>

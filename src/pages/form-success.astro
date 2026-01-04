@@ -1,0 +1,17 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+---
+
+<LayoutMain title="Спасибо" description="Форма успешно отправлена">
+  <Section>
+    <div class="text-center max-w-2xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">Спасибо!</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+        Ваше сообщение успешно отправлено. Мы свяжемся с вами в ближайшее время.
+      </p>
+      <Button href="/">Вернуться на главную</Button>
+    </div>
+  </Section>
+</LayoutMain>

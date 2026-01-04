@@ -1,0 +1,24 @@
+---
+import LayoutMain from './LayoutMain.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  pubDate?: Date;
+}
+
+const { title, description, pubDate } = Astro.props;
+---
+
+<LayoutMain title={title} description={description}>
+  <main>
+    <article>
+      {pubDate && (
+        <time datetime={pubDate.toISOString()}>
+          {pubDate.toLocaleDateString('ru-RU')}
+        </time>
+      )}
+      <slot />
+    </article>
+  </main>
+</LayoutMain>

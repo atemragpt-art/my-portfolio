@@ -1,0 +1,15 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+---
+
+<LayoutMain title="Главная" description="Главная страница портфолио">
+  <Section>
+    <h1 class="text-4xl font-bold mb-4">Добро пожаловать</h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+      Это главная страница сайта. Здесь будет размещен контент согласно Шаблону 1.
+    </p>
+    <Button href="/about">О компании</Button>
+  </Section>
+</LayoutMain>
