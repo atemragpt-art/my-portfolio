@@ -4,22 +4,12 @@ import LayoutMain from './LayoutMain.astro';
 interface Props {
   title: string;
   description?: string;
-  pubDate?: Date;
   ogType?: 'website' | 'article';
 }
 
-const { title, description, pubDate, ogType = 'article' } = Astro.props;
+const { title, description, ogType = 'article' } = Astro.props;
 ---
 
 <LayoutMain title={title} description={description} ogType={ogType}>
-  <main>
-    <article>
-      {pubDate && (
-        <time datetime={pubDate.toISOString()}>
-          {pubDate.toLocaleDateString('ru-RU')}
-        </time>
-      )}
-      <slot />
-    </article>
-  </main>
+  <slot />
 </LayoutMain>

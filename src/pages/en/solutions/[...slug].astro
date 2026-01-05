@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutService from '@/layouts/LayoutService.astro';
+import Section from '@/components/ui/Section.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { generateProfessionalServiceSchema } from '@/utils/schema';
+import { SITE_CONFIG } from '@/config/site';
+
+export async function getStaticPaths() {
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'en' as const;
+  
+  const allServices = await getCollection('services');
+  const services = filterByLang(allServices, lang);
+  
+  return services.map((service) => ({
+    params: { slug: service.slug },
+    props: { service },
+  }));
+}
+
+interface Props {
+  service: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
+}
+
+const { service } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!service) {
+  return Astro.redirect('/en/404');
+}
+
+const { Content } = await service.render();
+
+const serviceSchema = generateProfessionalServiceSchema({
+  name: service.data.title,
+  description: service.data.description,
+  provider: {
+    name: SITE_CONFIG.name,
+    url: Astro.site?.href,
+  },
+  serviceType: service.data.title,
+  areaServed: 'Worldwide',
+});
+---
+
+<LayoutService title={service.data.title} description={service.data.description}>
+  <script type="application/ld+json" set:html={serviceSchema} />
+  <Section>
+    <article class="prose dark:prose-invert max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">{service.data.title}</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">{service.data.description}</p>
+      
+      {(service.data.expertise.length > 0 || service.data.industries.length > 0) && (
+        <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          {service.data.expertise.length > 0 && (
+            <div class="mb-2">
+              <h3 class="text-lg font-semibold mb-2">Related Expertise</h3>
+              <div class="flex flex-wrap gap-2">
+                {service.data.expertise.map((exp) => (
+                  <Badge variant="secondary">{exp}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          {service.data.industries.length > 0 && (
+            <div>
+              <h3 class="text-lg font-semibold mb-2">Applied Industries</h3>
+              <div class="flex flex-wrap gap-2">
+                {service.data.industries.map((industry) => (
+                  <Badge variant="secondary">{industry}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      <Content />
+    </article>
+  </Section>
+</LayoutService>

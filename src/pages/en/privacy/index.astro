@@ -1,0 +1,17 @@
+---
+import LayoutLegal from '@/layouts/LayoutLegal.astro';
+import { useTranslations } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+---
+
+<LayoutLegal 
+  title={t('footer.privacy')} 
+  description="Privacy Policy"
+>
+  <h1 class="text-4xl font-bold mb-6">{t('footer.privacy')}</h1>
+  <div class="prose dark:prose-invert">
+    <p>Privacy policy content according to Template 10.</p>
+  </div>
+</LayoutLegal>

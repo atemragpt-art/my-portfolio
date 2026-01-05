@@ -1,0 +1,37 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import CooperationModels from '@/components/sections/CooperationModels.astro';
+import { generateOrganizationSchema } from '@/utils/schema';
+import { SITE_CONFIG } from '@/config/site';
+import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+const organizationSchema = generateOrganizationSchema({
+  name: SITE_CONFIG.name,
+  description: SITE_CONFIG.description,
+  url: Astro.site?.href ? `${Astro.site.href}/en/` : Astro.url.origin,
+  contactPoint: {
+    contactType: 'Customer Service',
+  },
+});
+---
+
+<LayoutMain 
+  title={t('meta.home.title')} 
+  description={t('meta.home.description')}
+>
+  <script type="application/ld+json" set:html={organizationSchema} />
+  <Section>
+    <h1 class="text-4xl font-bold mb-4">Welcome</h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+      This is the main page of the website. Content will be placed here according to Template 1.
+    </p>
+    <Button href={getLocalizedPath('/about/', lang)}>{t('nav.about')}</Button>
+  </Section>
+
+  <CooperationModels />
+</LayoutMain>

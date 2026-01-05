@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutService from '@/layouts/LayoutService.astro';
+import Section from '@/components/ui/Section.astro';
+import Badge from '@/components/ui/Badge.astro';
+
+export async function getStaticPaths() {
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'en' as const;
+  
+  const allIndustries = await getCollection('industries');
+  const industries = filterByLang(allIndustries, lang);
+  
+  return industries.map((industry) => ({
+    params: { slug: industry.slug },
+    props: { industry },
+  }));
+}
+
+interface Props {
+  industry: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
+}
+
+const { industry } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!industry) {
+  return Astro.redirect('/en/404');
+}
+
+const { Content } = await industry.render();
+---
+
+<LayoutService title={industry.data.title} description={industry.data.description}>
+  <Section>
+    <article class="prose dark:prose-invert max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">{industry.data.title}</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">{industry.data.description}</p>
+      
+      {industry.data.services.length > 0 && (
+        <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          <h3 class="text-lg font-semibold mb-2">Applied Services</h3>
+          <div class="flex flex-wrap gap-2">
+            {industry.data.services.map((service) => (
+              <Badge variant="secondary">{service}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <Content />
+    </article>
+  </Section>
+</LayoutService>

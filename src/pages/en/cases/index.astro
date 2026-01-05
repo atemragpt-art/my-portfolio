@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { sortByFeatured } from '@/utils/sorting';
+import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+// Фильтруем кейсы по языку
+const allCases = await getCollection('cases');
+const { filterByLang } = await import('@/utils/content');
+const cases = filterByLang(allCases, lang);
+const sortedCases = sortByFeatured(cases);
+---
+
+<LayoutMain 
+  title={t('nav.cases')} 
+  description="Our projects and case studies"
+>
+  <Section>
+    <h1 class="text-4xl font-bold mb-8">{t('nav.cases')}</h1>
+    
+    {sortedCases.length === 0 ? (
+      <EmptyState message={t('common.empty')} />
+    ) : (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sortedCases.map((caseItem) => (
+          <Card featured={caseItem.data.featured} featuredLabel="Featured">
+            <h2 class="text-2xl font-semibold mb-2">
+              <a 
+                href={getLocalizedPath(`/cases/${caseItem.slug}`, lang)} 
+                class="hover:text-blue-600 dark:hover:text-blue-400" 
+                data-astro-prefetch
+              >
+                {caseItem.data.title}
+              </a>
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{caseItem.data.description}</p>
+            {caseItem.data.client && (
+              <p class="text-sm text-gray-500 dark:text-gray-500 mb-2">
+                Client: {caseItem.data.client}
+              </p>
+            )}
+            {caseItem.data.industry && (
+              <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                Industry: {caseItem.data.industry}
+              </p>
+            )}
+            {caseItem.data.technologies.length > 0 && (
+              <div class="mt-4 flex flex-wrap gap-2">
+                {caseItem.data.technologies.map((tech) => (
+                  <Badge>{tech}</Badge>
+                ))}
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
+    )}
+  </Section>
+</LayoutMain>

@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutService from '@/layouts/LayoutService.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { sortByFeatured } from '@/utils/sorting';
+import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+// Фильтруем экспертизу по языку
+const allExpertiseItems = await getCollection('expertise');
+const { filterByLang } = await import('@/utils/content');
+const expertiseItems = filterByLang(allExpertiseItems, lang);
+const sortedExpertise = sortByFeatured(expertiseItems);
+---
+
+<LayoutService 
+  title={t('nav.expertise')} 
+  description="Our expertise and technologies"
+>
+  <Section>
+    <h1 class="text-4xl font-bold mb-8">{t('nav.expertise')}</h1>
+    
+    {sortedExpertise.length === 0 ? (
+      <EmptyState message={t('common.empty')} />
+    ) : (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sortedExpertise.map((item) => (
+          <Card featured={item.data.featured} featuredLabel="Featured">
+            <h2 class="text-2xl font-semibold mb-2">{item.data.title}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{item.data.description}</p>
+            {item.data.technologies.length > 0 && (
+              <div class="mb-4 flex flex-wrap gap-2">
+                {item.data.technologies.map((tech) => (
+                  <Badge>{tech}</Badge>
+                ))}
+              </div>
+            )}
+            <Button href={getLocalizedPath(`/expertise/${item.slug}`, lang)}>{t('common.readMore')}</Button>
+          </Card>
+        ))}
+      </div>
+    )}
+  </Section>
+</LayoutService>

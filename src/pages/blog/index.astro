@@ -7,8 +7,11 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByDate } from '@/utils/sorting';
+import { filterByLang } from '@/utils/content';
 
-const blogPosts = await getCollection('blog', ({ data }) => !data.draft);
+const lang = 'ru' as const;
+const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
+const blogPosts = filterByLang(allBlogPosts, lang);
 const sortedPosts = sortByDate(blogPosts);
 ---
 

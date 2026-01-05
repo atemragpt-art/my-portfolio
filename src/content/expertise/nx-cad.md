@@ -4,6 +4,7 @@ description: CAD системы NX
 technologies: ['NX', 'CAD', '3D Modeling']
 relatedServices: ['nc-programming', 'postprocessors']
 featured: true
+lang: ru
 ---
 
 # NX CAD

@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutPost from '@/layouts/LayoutPost.astro';
+import Section from '@/components/ui/Section.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { generateCaseStudySchema } from '@/utils/schema';
+import { useTranslations } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'en' as const;
+  
+  const allCases = await getCollection('cases');
+  const cases = filterByLang(allCases, lang);
+  
+  return cases.map((caseItem) => ({
+    params: { slug: caseItem.slug },
+    props: { caseItem },
+  }));
+}
+
+interface Props {
+  caseItem: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
+}
+
+const { caseItem } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!caseItem) {
+  return Astro.redirect('/en/404');
+}
+
+const { Content } = await caseItem.render();
+
+const caseStudySchema = generateCaseStudySchema({
+  name: caseItem.data.title,
+  description: caseItem.data.description,
+  image: caseItem.data.heroImage,
+  datePublished: new Date().toISOString(),
+  client: caseItem.data.client,
+  industry: caseItem.data.industry,
+});
+---
+
+<LayoutPost
+  title={caseItem.data.title}
+  description={caseItem.data.description}
+  ogType="article"
+>
+  <script type="application/ld+json" set:html={caseStudySchema} />
+  <Section>
+    <article class="prose dark:prose-invert max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">{caseItem.data.title}</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">{caseItem.data.description}</p>
+      
+      {(caseItem.data.client || caseItem.data.industry) && (
+        <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          {caseItem.data.client && (
+            <p class="mb-2"><strong>Client:</strong> {caseItem.data.client}</p>
+          )}
+          {caseItem.data.industry && (
+            <p><strong>Industry:</strong> {caseItem.data.industry}</p>
+          )}
+        </div>
+      )}
+      
+      <Content />
+      
+      {caseItem.data.technologies.length > 0 && (
+        <div class="mt-8">
+          <h3 class="text-xl font-semibold mb-4">Technologies</h3>
+          <div class="flex flex-wrap gap-2">
+            {caseItem.data.technologies.map((tech) => (
+              <Badge>{tech}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </article>
+  </Section>
+</LayoutPost>

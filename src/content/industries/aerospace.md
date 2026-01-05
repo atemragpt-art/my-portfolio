@@ -3,6 +3,7 @@ title: Аэрокосмическая отрасль
 description: Решения для аэрокосмической отрасли
 services: ['nc-programming', 'vericut-simulation', 'postprocessors']
 cases: []
+lang: ru
 ---
 
 # Аэрокосмическая отрасль

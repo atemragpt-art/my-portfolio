@@ -5,7 +5,12 @@ import Section from '@/components/ui/Section.astro';
 import { generateCaseStudySchema } from '@/utils/schema';
 
 export async function getStaticPaths() {
-  const cases = await getCollection('cases');
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'ru' as const;
+  
+  const allCases = await getCollection('cases');
+  const cases = filterByLang(allCases, lang);
+  
   return cases.map((caseItem) => ({
     params: { slug: caseItem.slug },
     props: { caseItem },
@@ -13,10 +18,16 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  caseItem: Awaited<ReturnType<typeof getCollection>>[number];
+  caseItem: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
 }
 
 const { caseItem } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!caseItem) {
+  return Astro.redirect('/404');
+}
+
 const { Content } = await caseItem.render();
 
 const caseStudySchema = generateCaseStudySchema({

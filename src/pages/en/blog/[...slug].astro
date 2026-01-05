@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutPost from '@/layouts/LayoutPost.astro';
+import Section from '@/components/ui/Section.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { generateArticleSchema } from '@/utils/schema';
+import { SITE_CONFIG } from '@/config/site';
+import { useTranslations, formatDate, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'en' as const;
+  
+  const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
+  const blogPosts = filterByLang(allBlogPosts, lang);
+  
+  return blogPosts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
+}
+
+const { post } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!post) {
+  return Astro.redirect('/en/404');
+}
+
+const { Content } = await post.render();
+
+const articleSchema = generateArticleSchema({
+  headline: post.data.title,
+  description: post.data.description,
+  image: post.data.heroImage,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: post.data.pubDate.toISOString(),
+  author: {
+    name: SITE_CONFIG.name,
+    url: Astro.site?.href ? `${Astro.site.href}/en/about/` : undefined,
+  },
+});
+---
+
+<LayoutPost
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+>
+  <script type="application/ld+json" set:html={articleSchema} />
+  <Section>
+    <article class="prose dark:prose-invert max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">{post.data.title}</h1>
+      {post.data.pubDate && (
+        <time class="text-gray-600 dark:text-gray-400 mb-6 block" datetime={post.data.pubDate.toISOString()}>
+          {formatDate(post.data.pubDate, lang)}
+        </time>
+      )}
+      <Content />
+      {post.data.tags.length > 0 && (
+        <div class="mt-8 flex flex-wrap gap-2">
+          {post.data.tags.map((tag) => (
+            <Badge>{tag}</Badge>
+          ))}
+        </div>
+      )}
+    </article>
+  </Section>
+</LayoutPost>

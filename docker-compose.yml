@@ -1,0 +1,88 @@
+# ==========================================
+# Docker Compose for Production Deployment
+# Astro SSR + Nginx Reverse Proxy + SSL
+# ==========================================
+
+services:
+  # ========================================
+  # Astro Application (Node.js SSR)
+  # ========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: astro-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=4321
+      # Telegram Bot
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      # SMTP (Email)
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_FROM=${SMTP_FROM}
+      - SMTP_TO=${SMTP_TO}
+    networks:
+      - webnet
+    # Не открываем порт наружу — только через nginx
+    expose:
+      - "4321"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4321/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ========================================
+  # Nginx Reverse Proxy + SSL
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      # SSL сертификаты (certbot или вручную)
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      # Let's Encrypt challenge
+      - ./docker/nginx/certbot:/var/www/certbot:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - webnet
+
+  # ========================================
+  # Certbot для автоматического SSL (опционально)
+  # ========================================
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./docker/nginx/ssl:/etc/letsencrypt
+      - ./docker/nginx/certbot:/var/www/certbot
+    # Запускается вручную или по cron
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    profiles:
+      - ssl  # Запускается только с --profile ssl
+
+networks:
+  webnet:
+    driver: bridge
+
+# ==========================================
+# Volumes (опционально для персистентности)
+# ==========================================
+# volumes:
+#   ssl-certs:

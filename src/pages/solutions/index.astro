@@ -8,8 +8,11 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByCategory } from '@/utils/sorting';
+import { filterByLang } from '@/utils/content';
 
-const services = await getCollection('services');
+const lang = 'ru' as const;
+const allServices = await getCollection('services');
+const services = filterByLang(allServices, lang);
 const sortedServices = sortByCategory(services, ['nc-programming', 'postprocessors', 'simulation', 'other']);
 ---
 

@@ -1,0 +1,76 @@
+---
+/**
+ * Компонент переключателя языка
+ * Поддерживает 10 языков включая RTL (арабский) и CJK (китайский)
+ */
+import { languages, type Lang } from '@/i18n/ui';
+import { getLangFromUrl, getLocalizedPath } from '@/i18n/utils';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+
+const currentLang = getLangFromUrl(Astro.url);
+const currentPath = Astro.url.pathname;
+---
+
+<div class={`relative group ${className}`}>
+  <button 
+    class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    aria-label="Select language"
+    aria-expanded="false"
+    aria-haspopup="true"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+    </svg>
+    <span class="uppercase font-semibold">{currentLang}</span>
+    <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  
+  <div 
+    class="absolute end-0 mt-2 w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-80 overflow-y-auto"
+    role="menu"
+  >
+    {Object.entries(languages).map(([code, name]) => (
+      <a
+        href={getLocalizedPath(currentPath, code as Lang)}
+        class:list={[
+          'flex items-center justify-between px-4 py-2.5 text-sm transition-colors',
+          code === currentLang
+            ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-medium'
+            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+        ]}
+        role="menuitem"
+        data-astro-prefetch
+        lang={code}
+        dir={code === 'ar' ? 'rtl' : 'ltr'}
+      >
+        <span>{name}</span>
+        {code === currentLang && (
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        )}
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Scrollbar styling для dropdown */
+  div[role="menu"]::-webkit-scrollbar {
+    width: 6px;
+  }
+  div[role="menu"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  div[role="menu"]::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+  }
+</style>

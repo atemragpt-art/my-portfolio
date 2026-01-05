@@ -1,0 +1,24 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+---
+
+<LayoutMain 
+  title="Thank You" 
+  description="Form submitted successfully"
+>
+  <Section>
+    <div class="text-center max-w-2xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">Thank You!</h1>
+      <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+        Your message has been sent successfully. We will contact you soon.
+      </p>
+      <Button href={getLocalizedPath('/', lang)}>{t('common.backHome')}</Button>
+    </div>
+  </Section>
+</LayoutMain>

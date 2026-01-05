@@ -7,8 +7,11 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByFeatured } from '@/utils/sorting';
+import { filterByLang } from '@/utils/content';
 
-const cases = await getCollection('cases');
+const lang = 'ru' as const;
+const allCases = await getCollection('cases');
+const cases = filterByLang(allCases, lang);
 const sortedCases = sortByFeatured(cases);
 ---
 

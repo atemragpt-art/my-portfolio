@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutService from '@/layouts/LayoutService.astro';
+import Section from '@/components/ui/Section.astro';
+import Badge from '@/components/ui/Badge.astro';
+
+export async function getStaticPaths() {
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'en' as const;
+  
+  const allExpertiseItems = await getCollection('expertise');
+  const expertiseItems = filterByLang(allExpertiseItems, lang);
+  
+  return expertiseItems.map((item) => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
+}
+
+interface Props {
+  item: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
+}
+
+const { item } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!item) {
+  return Astro.redirect('/en/404');
+}
+
+const { Content } = await item.render();
+---
+
+<LayoutService title={item.data.title} description={item.data.description}>
+  <Section>
+    <article class="prose dark:prose-invert max-w-4xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">{item.data.title}</h1>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">{item.data.description}</p>
+      
+      {item.data.technologies.length > 0 && (
+        <div class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+          <h3 class="text-lg font-semibold mb-2">Technologies</h3>
+          <div class="flex flex-wrap gap-2">
+            {item.data.technologies.map((tech) => (
+              <Badge variant="secondary">{tech}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <Content />
+    </article>
+  </Section>
+</LayoutService>

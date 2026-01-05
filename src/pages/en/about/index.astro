@@ -1,0 +1,30 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import { generatePersonSchema } from '@/utils/schema';
+import { SITE_CONFIG } from '@/config/site';
+import { useTranslations } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+const personSchema = generatePersonSchema({
+  name: SITE_CONFIG.name,
+  jobTitle: 'Technical Experts',
+  description: SITE_CONFIG.description,
+  url: Astro.site?.href ? `${Astro.site.href}/en/about/` : undefined,
+});
+---
+
+<LayoutMain 
+  title={t('nav.about')} 
+  description="Information about the company"
+>
+  <script type="application/ld+json" set:html={personSchema} />
+  <Section>
+    <h1 class="text-4xl font-bold mb-6">{t('nav.about')}</h1>
+    <div class="prose dark:prose-invert max-w-none">
+      <p>Content for the "About Us" page according to Template 7.</p>
+    </div>
+  </Section>
+</LayoutMain>

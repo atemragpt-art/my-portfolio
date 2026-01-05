@@ -2,6 +2,7 @@
 import ClientRouter from 'astro/components/ClientRouter.astro';
 import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
+import { getLangFromUrl, getAlternateLinks, getLocalizedPath, getDirection, defaultLang } from '@/i18n/utils';
 import '../styles/global.css';
 
 interface Props {
@@ -22,28 +23,48 @@ const {
   noindex = false,
 } = Astro.props;
 
-// Используем site из конфига или fallback для разработки
-const siteUrl = Astro.site?.href;
-if (!siteUrl) {
+// Определяем язык из URL
+const lang = getLangFromUrl(Astro.url);
+const dir = getDirection(lang);
+const isRtl = dir === 'rtl';
+
+// Формируем URLs
+// Используем Astro.site если настроен, иначе fallback на текущий origin (для dev)
+const siteUrl = Astro.site?.href?.replace(/\/$/, '') || Astro.url.origin;
+const canonicalPath = canonical ?? Astro.url.pathname;
+const fullUrl = `${siteUrl}${canonicalPath}`;
+const ogImageUrl = ogImage ? `${siteUrl}${ogImage}` : `${siteUrl}/og-image.jpg`;
+
+// Альтернативные языковые версии для SEO
+const alternateLinks = getAlternateLinks(Astro.url.pathname, siteUrl);
+
+// Предупреждение если site не настроен (только для production)
+if (!Astro.site?.href && import.meta.env.PROD) {
   console.warn('⚠️  Astro.site не настроен в astro.config.mjs. Укажи site URL перед деплоем.');
 }
-const fullUrl = canonical && siteUrl ? `${siteUrl}${canonical}` : Astro.url.href;
-const ogImageUrl = ogImage && siteUrl ? `${siteUrl}${ogImage}` : (siteUrl ? `${siteUrl}/og-image.jpg` : undefined);
 ---
 
 <!doctype html>
-<html lang="ru">
+<html lang={lang} dir={dir} class:list={[{ rtl: isRtl }]}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     
+    {/* hreflang для всех языковых версий — критично для SEO */}
+    {alternateLinks.map(({ hreflang, href }) => (
+      <link rel="alternate" hreflang={hreflang} href={href} />
+    ))}
+    {/* x-default указывает на текущую страницу на дефолтном языке (ru) */}
+    <link rel="alternate" hreflang="x-default" href={`${siteUrl}${getLocalizedPath(Astro.url.pathname, defaultLang)}`} />
+    
     {/* Open Graph */}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
     <meta property="og:url" content={fullUrl} />
+    <meta property="og:locale" content={lang} />
     {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
     
     {/* Twitter Card */}
@@ -52,22 +73,27 @@ const ogImageUrl = ogImage && siteUrl ? `${siteUrl}${ogImage}` : (siteUrl ? `${s
     <meta name="twitter:description" content={description} />
     {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
     
-    {/* Canonical */}
-    {canonical && <link rel="canonical" href={fullUrl} />}
-    
+    <link rel="canonical" href={fullUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    {/* Preconnect для Google Fonts (CJK шрифты) */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    {/* Noto Sans для CJK и арабского */}
+    <link 
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap" 
+      rel="stylesheet"
+    />
+    
     <title>{title}</title>
   </head>
-  <body>
+  <body class="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <ClientRouter />
-    <Header />
-    <slot />
-    <Footer />
+    <Header lang={lang} />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer lang={lang} />
   </body>
 </html>
-
-<style is:global>
-  html {
-    font-family: system-ui, sans-serif;
-  }
-</style>

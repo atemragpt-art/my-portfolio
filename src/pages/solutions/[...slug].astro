@@ -7,7 +7,12 @@ import { generateProfessionalServiceSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
 
 export async function getStaticPaths() {
-  const services = await getCollection('services');
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'ru' as const;
+  
+  const allServices = await getCollection('services');
+  const services = filterByLang(allServices, lang);
+  
   return services.map((service) => ({
     params: { slug: service.slug },
     props: { service },
@@ -15,10 +20,16 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  service: Awaited<ReturnType<typeof getCollection>>[number];
+  service: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
 }
 
 const { service } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!service) {
+  return Astro.redirect('/404');
+}
+
 const { Content } = await service.render();
 
 const serviceSchema = generateProfessionalServiceSchema({

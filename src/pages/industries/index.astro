@@ -6,8 +6,11 @@ import Button from '@/components/ui/Button.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
+import { filterByLang } from '@/utils/content';
 
-const industries = await getCollection('industries');
+const lang = 'ru' as const;
+const allIndustries = await getCollection('industries');
+const industries = filterByLang(allIndustries, lang);
 ---
 
 <LayoutService title="Отрасли" description="Отрасли, в которых мы работаем">

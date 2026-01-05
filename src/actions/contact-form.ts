@@ -1,6 +1,20 @@
 import { z } from 'zod';
 import nodemailer from 'nodemailer';
 
+/**
+ * Экранирование HTML для защиты от XSS
+ */
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
+}
+
 // Схема валидации формы
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
@@ -18,8 +32,8 @@ async function sendToTelegram(data: z.infer<typeof contactFormSchema>) {
     return;
   }
 
-  // Форматируем текст с HTML для лучшей читаемости
-  const text = `<b>Новая заявка с сайта</b>\n\n<b>Имя:</b> ${data.name}\n<b>Контакты:</b> ${data.contact}\n\n<b>Сообщение:</b>\n${data.message.replace(/\n/g, '\n')}`;
+  // Форматируем текст с HTML для лучшей читаемости (экранируем пользовательские данные)
+  const text = `<b>Новая заявка с сайта</b>\n\n<b>Имя:</b> ${escapeHtml(data.name)}\n<b>Контакты:</b> ${escapeHtml(data.contact)}\n\n<b>Сообщение:</b>\n${escapeHtml(data.message)}`;
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -70,14 +84,14 @@ async function sendEmail(data: z.infer<typeof contactFormSchema>) {
     await transporter.sendMail({
       from: smtpFrom,
       to: smtpTo,
-      subject: `Новая заявка с сайта от ${data.name}`,
+      subject: `Новая заявка с сайта от ${escapeHtml(data.name)}`,
       text: `Имя: ${data.name}\nКонтакты: ${data.contact}\n\nСообщение:\n${data.message}`,
       html: `
         <h2>Новая заявка с сайта</h2>
-        <p><strong>Имя:</strong> ${data.name}</p>
-        <p><strong>Контакты:</strong> ${data.contact}</p>
+        <p><strong>Имя:</strong> ${escapeHtml(data.name)}</p>
+        <p><strong>Контакты:</strong> ${escapeHtml(data.contact)}</p>
         <p><strong>Сообщение:</strong></p>
-        <p>${data.message.replace(/\n/g, '<br>')}</p>
+        <p>${escapeHtml(data.message).replace(/\n/g, '<br>')}</p>
       `,
     });
   } catch (error) {

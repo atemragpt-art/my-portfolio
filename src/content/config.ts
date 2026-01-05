@@ -9,6 +9,7 @@ const blog = defineCollection({
     heroImage: z.string().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    lang: z.enum(['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh']).default('ru'),
   }),
 });
 
@@ -22,6 +23,7 @@ const cases = defineCollection({
     technologies: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     heroImage: z.string().optional(),
+    lang: z.enum(['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh']).default('ru'),
   }),
 });
 
@@ -35,6 +37,7 @@ const expertise = defineCollection({
     relatedServices: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     heroImage: z.string().optional(),
+    lang: z.enum(['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh']).default('ru'),
   }),
 });
 
@@ -48,6 +51,7 @@ const services = defineCollection({
     industries: z.array(z.string()).default([]),
     pricing: z.string().optional(),
     heroImage: z.string().optional(),
+    lang: z.enum(['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh']).default('ru'),
   }),
 });
 
@@ -59,6 +63,7 @@ const industries = defineCollection({
     services: z.array(z.string()).default([]),
     cases: z.array(z.string()).default([]),
     heroImage: z.string().optional(),
+    lang: z.enum(['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh']).default('ru'),
   }),
 });
 

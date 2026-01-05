@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import LayoutService from '@/layouts/LayoutService.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import CooperationModels from '@/components/sections/CooperationModels.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { sortByCategory } from '@/utils/sorting';
+import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+
+// Фильтруем услуги по языку
+const allServices = await getCollection('services');
+const { filterByLang } = await import('@/utils/content');
+const services = filterByLang(allServices, lang);
+const sortedServices = sortByCategory(services, ['nc-programming', 'postprocessors', 'simulation', 'other']);
+---
+
+<LayoutService 
+  title={t('nav.services')} 
+  description="Our solutions and services"
+>
+  <Section>
+    <h1 class="text-4xl font-bold mb-8">{t('nav.services')}</h1>
+    
+    {sortedServices.length === 0 ? (
+      <EmptyState message={t('common.empty')} />
+    ) : (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sortedServices.map((service) => (
+          <Card>
+            <h2 class="text-2xl font-semibold mb-2">{service.data.title}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{service.data.description}</p>
+            {service.data.expertise.length > 0 && (
+              <div class="mb-4 flex flex-wrap gap-2">
+                {service.data.expertise.map((exp) => (
+                  <Badge size="sm">{exp}</Badge>
+                ))}
+              </div>
+            )}
+            <Button href={getLocalizedPath(`/solutions/${service.slug}`, lang)}>{t('common.readMore')}</Button>
+          </Card>
+        ))}
+      </div>
+    )}
+  </Section>
+
+  <CooperationModels />
+</LayoutService>

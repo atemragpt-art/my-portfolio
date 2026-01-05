@@ -5,7 +5,12 @@ import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
 
 export async function getStaticPaths() {
-  const industries = await getCollection('industries');
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'ru' as const;
+  
+  const allIndustries = await getCollection('industries');
+  const industries = filterByLang(allIndustries, lang);
+  
   return industries.map((industry) => ({
     params: { slug: industry.slug },
     props: { industry },
@@ -13,10 +18,16 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  industry: Awaited<ReturnType<typeof getCollection>>[number];
+  industry: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
 }
 
 const { industry } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!industry) {
+  return Astro.redirect('/404');
+}
+
 const { Content } = await industry.render();
 ---
 

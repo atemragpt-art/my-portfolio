@@ -2,10 +2,17 @@
 import { getCollection } from 'astro:content';
 import LayoutPost from '@/layouts/LayoutPost.astro';
 import Section from '@/components/ui/Section.astro';
+import Badge from '@/components/ui/Badge.astro';
 import { generateArticleSchema } from '@/utils/schema';
+import { SITE_CONFIG } from '@/config/site';
 
 export async function getStaticPaths() {
-  const blogPosts = await getCollection('blog', ({ data }) => !data.draft);
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'ru' as const;
+  
+  const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
+  const blogPosts = filterByLang(allBlogPosts, lang);
+  
   return blogPosts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
@@ -13,10 +20,16 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  post: Awaited<ReturnType<typeof getCollection>>[number];
+  post: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
 }
 
 const { post } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!post) {
+  return Astro.redirect('/404');
+}
+
 const { Content } = await post.render();
 
 const articleSchema = generateArticleSchema({
@@ -35,7 +48,6 @@ const articleSchema = generateArticleSchema({
 <LayoutPost
   title={post.data.title}
   description={post.data.description}
-  pubDate={post.data.pubDate}
   ogType="article"
 >
   <script type="application/ld+json" set:html={articleSchema} />

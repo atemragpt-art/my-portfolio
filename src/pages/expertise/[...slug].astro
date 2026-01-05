@@ -5,7 +5,12 @@ import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
 
 export async function getStaticPaths() {
-  const expertiseItems = await getCollection('expertise');
+  const { filterByLang } = await import('@/utils/content');
+  const lang = 'ru' as const;
+  
+  const allExpertiseItems = await getCollection('expertise');
+  const expertiseItems = filterByLang(allExpertiseItems, lang);
+  
   return expertiseItems.map((item) => ({
     params: { slug: item.slug },
     props: { item },
@@ -13,10 +18,16 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  item: Awaited<ReturnType<typeof getCollection>>[number];
+  item: Awaited<ReturnType<typeof getCollection>>[number] | undefined;
 }
 
 const { item } = Astro.props;
+
+// Проверяем, что элемент найден
+if (!item) {
+  return Astro.redirect('/404');
+}
+
 const { Content } = await item.render();
 ---
 

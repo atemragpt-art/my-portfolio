@@ -1,22 +1,31 @@
 ---
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
 const currentYear = new Date().getFullYear();
 
+// Локализованные ссылки
 const footerLinks = {
   company: [
-    { href: '/about/', label: 'О нас' },
-    { href: '/hr/', label: 'Карьера' },
+    { href: getLocalizedPath('/about/', lang), label: t('nav.about') },
+    { href: getLocalizedPath('/hr/', lang), label: t('footer.career') },
   ],
   resources: [
-    { href: '/blog/', label: 'Блог' },
-    { href: '/cases/', label: 'Кейсы' },
-    { href: '/faq/', label: 'FAQ' },
+    { href: getLocalizedPath('/blog/', lang), label: t('nav.blog') },
+    { href: getLocalizedPath('/cases/', lang), label: t('nav.cases') },
+    { href: getLocalizedPath('/faq/', lang), label: t('nav.faq') },
   ],
   legal: [
-    { href: '/privacy/', label: 'Политика конфиденциальности' },
-    { href: '/terms/', label: 'Условия использования' },
+    { href: getLocalizedPath('/privacy/', lang), label: t('footer.privacy') },
+    { href: getLocalizedPath('/terms/', lang), label: t('footer.terms') },
   ],
   contact: [
-    { href: '/contact/', label: 'Связаться с нами' },
+    { href: getLocalizedPath('/contact/', lang), label: t('nav.contact') },
   ],
 };
 ---
@@ -26,7 +35,9 @@ const footerLinks = {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
       {/* Компания */}
       <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Компания</h3>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          {t('footer.company')}
+        </h3>
         <ul class="space-y-2">
           {footerLinks.company.map((link) => (
             <li>
@@ -44,7 +55,9 @@ const footerLinks = {
 
       {/* Ресурсы */}
       <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Ресурсы</h3>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          {t('footer.resources')}
+        </h3>
         <ul class="space-y-2">
           {footerLinks.resources.map((link) => (
             <li>
@@ -62,7 +75,9 @@ const footerLinks = {
 
       {/* Правовая информация */}
       <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Правовая информация</h3>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          {t('footer.legal')}
+        </h3>
         <ul class="space-y-2">
           {footerLinks.legal.map((link) => (
             <li>
@@ -80,7 +95,9 @@ const footerLinks = {
 
       {/* Контакты */}
       <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Контакты</h3>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          {t('footer.contacts')}
+        </h3>
         <ul class="space-y-2">
           {footerLinks.contact.map((link) => (
             <li>
@@ -99,7 +116,7 @@ const footerLinks = {
 
     {/* Copyright */}
     <div class="pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-400">
-      <p>&copy; {currentYear} Все права защищены.</p>
+      <p>{t('footer.copyright', { year: currentYear })}</p>
     </div>
   </div>
 </footer>

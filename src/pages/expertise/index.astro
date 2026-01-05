@@ -7,8 +7,11 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByFeatured } from '@/utils/sorting';
+import { filterByLang } from '@/utils/content';
 
-const expertiseItems = await getCollection('expertise');
+const lang = 'ru' as const;
+const allExpertiseItems = await getCollection('expertise');
+const expertiseItems = filterByLang(allExpertiseItems, lang);
 const sortedExpertise = sortByFeatured(expertiseItems);
 ---
 

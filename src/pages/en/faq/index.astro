@@ -1,0 +1,20 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import { useTranslations } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+---
+
+<LayoutMain 
+  title={t('nav.faq')} 
+  description="Frequently asked questions"
+>
+  <Section>
+    <h1 class="text-4xl font-bold mb-6">Frequently Asked Questions</h1>
+    <div class="prose dark:prose-invert max-w-none">
+      <p>FAQ page content according to Template 10.</p>
+    </div>
+  </Section>
+</LayoutMain>

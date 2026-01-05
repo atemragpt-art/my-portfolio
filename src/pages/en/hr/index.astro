@@ -1,0 +1,22 @@
+---
+import LayoutMain from '@/layouts/LayoutMain.astro';
+import Section from '@/components/ui/Section.astro';
+import Button from '@/components/ui/Button.astro';
+import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+---
+
+<LayoutMain 
+  title={t('footer.career')} 
+  description="Join our team"
+>
+  <Section>
+    <h1 class="text-4xl font-bold mb-6">Join Our Team</h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+      HR landing page content according to Template 8.
+    </p>
+    <Button href={getLocalizedPath('/contact/', lang)}>{t('nav.contact')}</Button>
+  </Section>
+</LayoutMain>

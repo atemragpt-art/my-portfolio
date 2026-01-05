@@ -3,6 +3,7 @@ title: Машиностроение
 description: Решения для машиностроения
 services: ['nc-programming', 'postprocessors']
 cases: []
+lang: ru
 ---
 
 # Машиностроение

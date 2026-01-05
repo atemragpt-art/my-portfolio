@@ -1,46 +1,70 @@
 ---
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
+
 interface Props {
+  lang: Lang;
   mobile?: boolean;
 }
 
-const { mobile = false } = Astro.props;
+const { lang, mobile = false } = Astro.props;
+const t = useTranslations(lang);
 
+// Навигационные элементы с переводами
 const navItems = [
-  { href: '/', label: 'Главная' },
-  { href: '/about/', label: 'О компании' },
+  { href: getLocalizedPath('/', lang), label: t('nav.home') },
+  { href: getLocalizedPath('/about/', lang), label: t('nav.about') },
   {
-    href: '/solutions/',
-    label: 'Услуги',
+    href: getLocalizedPath('/solutions/', lang),
+    label: t('nav.services'),
     children: [
-      { href: '/solutions/nc-programming', label: 'NC Programming' },
-      { href: '/solutions/postprocessors', label: 'Postprocessors' },
-      { href: '/solutions/vericut-simulation', label: 'VERICUT Simulation' },
+      { href: getLocalizedPath('/solutions/nc-programming/', lang), label: 'NC Programming' },
+      { href: getLocalizedPath('/solutions/postprocessors/', lang), label: 'Postprocessors' },
+      { href: getLocalizedPath('/solutions/vericut-simulation/', lang), label: 'VERICUT Simulation' },
     ],
   },
   {
-    href: '/expertise/',
-    label: 'Экспертиза',
+    href: getLocalizedPath('/expertise/', lang),
+    label: t('nav.expertise'),
     children: [
-      { href: '/expertise/nx-cad', label: 'NX CAD' },
-      { href: '/expertise/nx-cam', label: 'NX CAM' },
-      { href: '/expertise/vericut', label: 'VERICUT' },
+      { href: getLocalizedPath('/expertise/nx-cad/', lang), label: 'NX CAD' },
+      { href: getLocalizedPath('/expertise/nx-cam/', lang), label: 'NX CAM' },
+      { href: getLocalizedPath('/expertise/vericut/', lang), label: 'VERICUT' },
     ],
   },
   {
-    href: '/industries/',
-    label: 'Отрасли',
+    href: getLocalizedPath('/industries/', lang),
+    label: t('nav.industries'),
     children: [
-      { href: '/industries/aerospace', label: 'Аэрокосмическая' },
-      { href: '/industries/energy-oil-gas', label: 'Энергетика и нефтегаз' },
-      { href: '/industries/machinery', label: 'Машиностроение' },
+      { href: getLocalizedPath('/industries/aerospace/', lang), label: 'Aerospace' },
+      { href: getLocalizedPath('/industries/energy-oil-gas/', lang), label: 'Energy & Oil' },
+      { href: getLocalizedPath('/industries/machinery/', lang), label: 'Machinery' },
     ],
   },
-  { href: '/cases/', label: 'Кейсы' },
-  { href: '/blog/', label: 'Блог' },
-  { href: '/contact/', label: 'Контакты' },
+  { href: getLocalizedPath('/cases/', lang), label: t('nav.cases') },
+  { href: getLocalizedPath('/blog/', lang), label: t('nav.blog') },
+  { href: getLocalizedPath('/contact/', lang), label: t('nav.contact') },
 ];
 
 const currentPath = Astro.url.pathname;
+
+// Проверка активности пути (учитывая локализацию)
+function isActive(href: string): boolean {
+  // Нормализуем пути (убираем trailing slash)
+  const normalizedHref = href.replace(/\/$/, '') || '/';
+  const normalizedPath = currentPath.replace(/\/$/, '') || '/';
+  
+  // Точное совпадение для главной
+  if (normalizedHref === '/' || normalizedHref === `/${lang}`) {
+    return normalizedPath === '/' || normalizedPath === `/${lang}`;
+  }
+  
+  // Для остальных страниц — проверяем точное совпадение или что путь начинается с href + '/'
+  // Это предотвращает ложные срабатывания (например, /about не будет активным для /about-us)
+  return (
+    normalizedPath === normalizedHref ||
+    normalizedPath.startsWith(`${normalizedHref}/`)
+  );
+}
 ---
 
 {mobile ? (
@@ -49,26 +73,28 @@ const currentPath = Astro.url.pathname;
       <li>
         <a
           href={item.href}
-          class={`block px-4 py-2 rounded-lg transition-colors ${
-            currentPath === item.href
+          class:list={[
+            'block px-4 py-2 rounded-lg transition-colors',
+            isActive(item.href)
               ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-          }`}
+          ]}
           data-astro-prefetch
         >
           {item.label}
         </a>
         {item.children && (
-          <ul class="ml-4 mt-2 space-y-1">
+          <ul class="ms-4 mt-2 space-y-1">
             {item.children.map((child) => (
               <li>
                 <a
                   href={child.href}
-                  class={`block px-4 py-2 rounded-lg text-sm transition-colors ${
-                    currentPath === child.href
+                  class:list={[
+                    'block px-4 py-2 rounded-lg text-sm transition-colors',
+                    isActive(child.href)
                       ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
+                  ]}
                   data-astro-prefetch
                 >
                   {child.label}
@@ -81,32 +107,34 @@ const currentPath = Astro.url.pathname;
     ))}
   </ul>
 ) : (
-  <ul class="flex items-center space-x-6">
+  <ul class="flex items-center gap-1">
     {navItems.map((item) => (
       <li class="relative group">
         <a
           href={item.href}
-          class={`px-3 py-2 rounded-lg transition-colors ${
-            currentPath === item.href
+          class:list={[
+            'px-3 py-2 rounded-lg transition-colors inline-block',
+            isActive(item.href)
               ? 'text-blue-600 dark:text-blue-400 font-semibold'
               : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-          }`}
+          ]}
           data-astro-prefetch
         >
           {item.label}
         </a>
         {item.children && (
-          <div class="absolute left-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2">
+          <div class="absolute start-0 mt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-2 z-50">
             <ul class="space-y-1">
               {item.children.map((child) => (
                 <li>
                   <a
                     href={child.href}
-                    class={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                      currentPath === child.href
+                    class:list={[
+                      'block px-3 py-2 rounded-lg text-sm transition-colors',
+                      isActive(child.href)
                         ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
+                    ]}
                     data-astro-prefetch
                   >
                     {child.label}
