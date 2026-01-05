@@ -1,0 +1,29 @@
+---
+interface Props {
+  variant?: 'default' | 'primary' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  size = 'sm',
+  class: className = '',
+} = Astro.props;
+
+const variantClasses = {
+  default: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  primary: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
+  secondary: 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
+};
+
+const sizeClasses = {
+  sm: 'px-2 py-1 text-xs',
+  md: 'px-3 py-1 text-sm',
+  lg: 'px-4 py-2 text-base',
+};
+---
+
+<span class={`inline-block rounded-full font-medium ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}>
+  <slot />
+</span>

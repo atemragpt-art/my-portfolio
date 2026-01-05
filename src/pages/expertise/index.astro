@@ -1,26 +1,40 @@
 ---
+import { getCollection } from 'astro:content';
 import LayoutService from '@/layouts/LayoutService.astro';
 import Section from '@/components/ui/Section.astro';
 import Button from '@/components/ui/Button.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { sortByFeatured } from '@/utils/sorting';
 
-const expertise = [
-  { slug: 'nx-cad', title: 'NX CAD', description: 'CAD системы NX' },
-  { slug: 'nx-cam', title: 'NX CAM', description: 'CAM системы NX' },
-  { slug: 'vericut', title: 'VERICUT', description: 'VERICUT симуляция' },
-];
+const expertiseItems = await getCollection('expertise');
+const sortedExpertise = sortByFeatured(expertiseItems);
 ---
 
 <LayoutService title="Экспертиза" description="Наша экспертиза и технологии">
   <Section>
     <h1 class="text-4xl font-bold mb-8">Экспертиза</h1>
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {expertise.map((item) => (
-        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-          <h2 class="text-2xl font-semibold mb-2">{item.title}</h2>
-          <p class="text-gray-600 dark:text-gray-400 mb-4">{item.description}</p>
-          <Button href={`/expertise/${item.slug}`}>Подробнее</Button>
-        </div>
-      ))}
-    </div>
+    
+    {sortedExpertise.length === 0 ? (
+      <EmptyState message="Пока нет опубликованных направлений экспертизы." />
+    ) : (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sortedExpertise.map((item) => (
+          <Card featured={item.data.featured} featuredLabel="Рекомендуемое">
+            <h2 class="text-2xl font-semibold mb-2">{item.data.title}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{item.data.description}</p>
+            {item.data.technologies.length > 0 && (
+              <div class="mb-4 flex flex-wrap gap-2">
+                {item.data.technologies.map((tech) => (
+                  <Badge>{tech}</Badge>
+                ))}
+              </div>
+            )}
+            <Button href={`/expertise/${item.slug}`}>Подробнее</Button>
+          </Card>
+        ))}
+      </div>
+    )}
   </Section>
 </LayoutService>

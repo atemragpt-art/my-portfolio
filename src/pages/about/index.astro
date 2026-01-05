@@ -1,9 +1,19 @@
 ---
 import LayoutMain from '@/layouts/LayoutMain.astro';
 import Section from '@/components/ui/Section.astro';
+import { generatePersonSchema } from '@/utils/schema';
+import { SITE_CONFIG } from '@/config/site';
+
+const personSchema = generatePersonSchema({
+  name: SITE_CONFIG.name,
+  jobTitle: 'Технические эксперты',
+  description: SITE_CONFIG.description,
+  url: Astro.site?.href ? `${Astro.site.href}/about/` : undefined,
+});
 ---
 
 <LayoutMain title="О компании" description="Информация о компании">
+  <script type="application/ld+json" set:html={personSchema} />
   <Section>
     <h1 class="text-4xl font-bold mb-6">О компании</h1>
     <div class="prose dark:prose-invert max-w-none">

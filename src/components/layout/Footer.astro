@@ -1,0 +1,105 @@
+---
+const currentYear = new Date().getFullYear();
+
+const footerLinks = {
+  company: [
+    { href: '/about/', label: 'О нас' },
+    { href: '/hr/', label: 'Карьера' },
+  ],
+  resources: [
+    { href: '/blog/', label: 'Блог' },
+    { href: '/cases/', label: 'Кейсы' },
+    { href: '/faq/', label: 'FAQ' },
+  ],
+  legal: [
+    { href: '/privacy/', label: 'Политика конфиденциальности' },
+    { href: '/terms/', label: 'Условия использования' },
+  ],
+  contact: [
+    { href: '/contact/', label: 'Связаться с нами' },
+  ],
+};
+---
+
+<footer class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+  <div class="container mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      {/* Компания */}
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Компания</h3>
+        <ul class="space-y-2">
+          {footerLinks.company.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                data-astro-prefetch
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Ресурсы */}
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Ресурсы</h3>
+        <ul class="space-y-2">
+          {footerLinks.resources.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                data-astro-prefetch
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Правовая информация */}
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Правовая информация</h3>
+        <ul class="space-y-2">
+          {footerLinks.legal.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                data-astro-prefetch
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Контакты */}
+      <div>
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Контакты</h3>
+        <ul class="space-y-2">
+          {footerLinks.contact.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                data-astro-prefetch
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    {/* Copyright */}
+    <div class="pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-400">
+      <p>&copy; {currentYear} Все права защищены.</p>
+    </div>
+  </div>
+</footer>

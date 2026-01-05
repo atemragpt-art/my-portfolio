@@ -18,7 +18,8 @@ async function sendToTelegram(data: z.infer<typeof contactFormSchema>) {
     return;
   }
 
-  const text = `Новая заявка с сайта:\n\nИмя: ${data.name}\nКонтакты: ${data.contact}\n\nСообщение:\n${data.message}`;
+  // Форматируем текст с HTML для лучшей читаемости
+  const text = `<b>Новая заявка с сайта</b>\n\n<b>Имя:</b> ${data.name}\n<b>Контакты:</b> ${data.contact}\n\n<b>Сообщение:</b>\n${data.message.replace(/\n/g, '\n')}`;
 
   try {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {

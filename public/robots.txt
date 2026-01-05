@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+# TODO: Замени на реальный домен перед деплоем
+# Sitemap: https://yourdomain.com/sitemap-index.xml
+
+# Disallow admin and private areas
+Disallow: /api/
+Disallow: /form-success

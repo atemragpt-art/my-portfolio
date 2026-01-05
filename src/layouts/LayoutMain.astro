@@ -1,13 +1,34 @@
 ---
-import { ClientRouter } from 'astro:transitions/router';
+import ClientRouter from 'astro/components/ClientRouter.astro';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
 import '../styles/global.css';
 
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  canonical?: string;
+  noindex?: boolean;
 }
 
-const { title, description = '' } = Astro.props;
+const { 
+  title, 
+  description = '', 
+  ogImage,
+  ogType = 'website',
+  canonical,
+  noindex = false,
+} = Astro.props;
+
+// Используем site из конфига или fallback для разработки
+const siteUrl = Astro.site?.href;
+if (!siteUrl) {
+  console.warn('⚠️  Astro.site не настроен в astro.config.mjs. Укажи site URL перед деплоем.');
+}
+const fullUrl = canonical && siteUrl ? `${siteUrl}${canonical}` : Astro.url.href;
+const ogImageUrl = ogImage && siteUrl ? `${siteUrl}${ogImage}` : (siteUrl ? `${siteUrl}/og-image.jpg` : undefined);
 ---
 
 <!doctype html>
@@ -16,12 +37,32 @@ const { title, description = '' } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    
+    {/* Open Graph */}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={fullUrl} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    
+    {/* Twitter Card */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    
+    {/* Canonical */}
+    {canonical && <link rel="canonical" href={fullUrl} />}
+    
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
   <body>
     <ClientRouter />
+    <Header />
     <slot />
+    <Footer />
   </body>
 </html>
 

@@ -1,26 +1,43 @@
 ---
+import { getCollection } from 'astro:content';
 import LayoutService from '@/layouts/LayoutService.astro';
 import Section from '@/components/ui/Section.astro';
 import Button from '@/components/ui/Button.astro';
+import CooperationModels from '@/components/sections/CooperationModels.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import Card from '@/components/ui/Card.astro';
+import Badge from '@/components/ui/Badge.astro';
+import { sortByCategory } from '@/utils/sorting';
 
-const solutions = [
-  { slug: 'nc-programming', title: 'NC Programming', description: 'Программирование ЧПУ' },
-  { slug: 'postprocessors', title: 'Postprocessors', description: 'Постпроцессоры' },
-  { slug: 'vericut-simulation', title: 'VERICUT Simulation', description: 'Симуляция VERICUT' },
-];
+const services = await getCollection('services');
+const sortedServices = sortByCategory(services, ['nc-programming', 'postprocessors', 'simulation', 'other']);
 ---
 
 <LayoutService title="Решения" description="Наши решения и услуги">
   <Section>
     <h1 class="text-4xl font-bold mb-8">Решения</h1>
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {solutions.map((solution) => (
-        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition-shadow">
-          <h2 class="text-2xl font-semibold mb-2">{solution.title}</h2>
-          <p class="text-gray-600 dark:text-gray-400 mb-4">{solution.description}</p>
-          <Button href={`/solutions/${solution.slug}`}>Подробнее</Button>
-        </div>
-      ))}
-    </div>
+    
+    {sortedServices.length === 0 ? (
+      <EmptyState message="Пока нет опубликованных услуг." />
+    ) : (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {sortedServices.map((service) => (
+          <Card>
+            <h2 class="text-2xl font-semibold mb-2">{service.data.title}</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">{service.data.description}</p>
+            {service.data.expertise.length > 0 && (
+              <div class="mb-4 flex flex-wrap gap-2">
+                {service.data.expertise.map((exp) => (
+                  <Badge size="sm">{exp}</Badge>
+                ))}
+              </div>
+            )}
+            <Button href={`/solutions/${service.slug}`}>Подробнее</Button>
+          </Card>
+        ))}
+      </div>
+    )}
   </Section>
+
+  <CooperationModels />
 </LayoutService>

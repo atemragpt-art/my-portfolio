@@ -5,12 +5,13 @@ interface Props {
   title: string;
   description?: string;
   pubDate?: Date;
+  ogType?: 'website' | 'article';
 }
 
-const { title, description, pubDate } = Astro.props;
+const { title, description, pubDate, ogType = 'article' } = Astro.props;
 ---
 
-<LayoutMain title={title} description={description}>
+<LayoutMain title={title} description={description} ogType={ogType}>
   <main>
     <article>
       {pubDate && (

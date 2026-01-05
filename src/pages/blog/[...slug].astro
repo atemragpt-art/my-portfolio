@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import LayoutPost from '@/layouts/LayoutPost.astro';
 import Section from '@/components/ui/Section.astro';
+import { generateArticleSchema } from '@/utils/schema';
 
 export async function getStaticPaths() {
   const blogPosts = await getCollection('blog', ({ data }) => !data.draft);
@@ -17,13 +18,27 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content } = await post.render();
+
+const articleSchema = generateArticleSchema({
+  headline: post.data.title,
+  description: post.data.description,
+  image: post.data.heroImage,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: post.data.pubDate.toISOString(),
+  author: {
+    name: SITE_CONFIG.name,
+    url: Astro.site?.href ? `${Astro.site.href}/about/` : undefined,
+  },
+});
 ---
 
 <LayoutPost
   title={post.data.title}
   description={post.data.description}
   pubDate={post.data.pubDate}
+  ogType="article"
 >
+  <script type="application/ld+json" set:html={articleSchema} />
   <Section>
     <article class="prose dark:prose-invert max-w-4xl mx-auto">
       <h1 class="text-4xl font-bold mb-4">{post.data.title}</h1>
@@ -36,9 +51,7 @@ const { Content } = await post.render();
       {post.data.tags.length > 0 && (
         <div class="mt-8 flex flex-wrap gap-2">
           {post.data.tags.map((tag) => (
-            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm">
-              {tag}
-            </span>
+            <Badge>{tag}</Badge>
           ))}
         </div>
       )}

@@ -1,0 +1,97 @@
+---
+import Section from '@/components/ui/Section.astro';
+
+const models = [
+  {
+    title: 'Fractional Lead Technologist',
+    description: 'Внешний главный технолог / техдиректор (Part-time)',
+    paymentType: 'Retainer',
+    paymentLabel: 'Абонентская плата',
+    details: [
+      'Регулярный менеджмент',
+      'Найм команды',
+      'Выстраивание процессов',
+      'Контроль внедрений',
+    ],
+  },
+  {
+    title: 'Project-Based',
+    description: 'Реализация конкретной задачи с понятным финишем',
+    paymentType: 'Fixed Price',
+    paymentLabel: 'Фиксированная цена',
+    details: [
+      'Постпроцессоры',
+      'Кинематика',
+      'Внедрение детали',
+      'Отладка технологии',
+    ],
+  },
+  {
+    title: 'Audit & Strategy',
+    description: 'Технический скрининг и поиск точек роста',
+    paymentType: 'Fixed Price',
+    paymentLabel: 'Фиксированная цена',
+    details: [
+      'Аудит перед покупкой станков',
+      'Анализ причин брака',
+      'Дорожная карта развития',
+    ],
+  },
+  {
+    title: 'Emergency / Hourly',
+    description: 'Срочное решение проблем ("Скорая помощь")',
+    paymentType: 'Time & Material',
+    paymentLabel: 'Почасовая оплата',
+    details: [
+      'Аварийные случаи',
+      'Сложные баги в ЧПУ',
+      'Срочные консультации',
+    ],
+  },
+];
+---
+
+<Section>
+  <div class="mb-12 text-center">
+    <h2 class="text-4xl font-bold mb-4">Форматы сотрудничества</h2>
+    <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      Выберите оптимальный формат работы для ваших задач
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {models.map((model) => (
+      <div class="group relative p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 hover:shadow-lg">
+        {/* Badge */}
+        <div class="mb-4">
+          <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+            {model.paymentType}
+          </span>
+          <span class="ml-2 text-xs text-gray-500 dark:text-gray-400">
+            {model.paymentLabel}
+          </span>
+        </div>
+
+        {/* Title */}
+        <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
+          {model.title}
+        </h3>
+
+        {/* Description */}
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          {model.description}
+        </p>
+
+        {/* Details */}
+        <ul class="space-y-2">
+          {model.details.map((detail) => (
+            <li class="flex items-start text-sm text-gray-700 dark:text-gray-300">
+              <span class="mr-2 text-blue-600 dark:text-blue-400">•</span>
+              <span>{detail}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</Section>

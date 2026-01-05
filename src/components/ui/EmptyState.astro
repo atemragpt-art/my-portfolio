@@ -1,0 +1,9 @@
+---
+interface Props {
+  message?: string;
+}
+
+const { message = 'Пока нет опубликованных элементов.' } = Astro.props;
+---
+
+<p class="text-gray-600 dark:text-gray-400">{message}</p>

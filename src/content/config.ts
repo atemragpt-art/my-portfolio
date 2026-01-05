@@ -25,7 +25,47 @@ const cases = defineCollection({
   }),
 });
 
+const expertise = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    icon: z.string().optional(),
+    technologies: z.array(z.string()).default([]),
+    relatedServices: z.array(z.string()).default([]),
+    featured: z.boolean().default(false),
+    heroImage: z.string().optional(),
+  }),
+});
+
+const services = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    category: z.enum(['nc-programming', 'postprocessors', 'simulation', 'other']).default('other'),
+    expertise: z.array(z.string()).default([]),
+    industries: z.array(z.string()).default([]),
+    pricing: z.string().optional(),
+    heroImage: z.string().optional(),
+  }),
+});
+
+const industries = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    services: z.array(z.string()).default([]),
+    cases: z.array(z.string()).default([]),
+    heroImage: z.string().optional(),
+  }),
+});
+
 export const collections = {
   blog,
   cases,
+  expertise,
+  services,
+  industries,
 };

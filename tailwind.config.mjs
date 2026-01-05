@@ -1,13 +1,8 @@
-/** @type {import('tailwindcss').Config} */
+// Tailwind v4 использует CSS-first конфигурацию
+// Основные настройки в src/styles/global.css через @theme
+// Плагин typography для prose классов
+import typography from '@tailwindcss/typography';
+
 export default {
-  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
-  darkMode: 'class',
-  theme: {
-    extend: {
-      colors: {
-        // Используем CSS variables для цветов, определенных в global.css
-      },
-    },
-  },
-  plugins: [],
+  plugins: [typography],
 };
