@@ -3,18 +3,24 @@ import { getCollection } from 'astro:content';
 import LayoutService from '@/layouts/LayoutService.astro';
 import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'en' as const;
-  
-  const allIndustries = await getCollection('industries');
-  const industries = filterByLang(allIndustries, lang);
-  
-  return industries.map((industry) => ({
-    params: { slug: industry.slug },
-    props: { industry },
-  }));
+  try {
+    const lang: Lang = 'en';
+    
+    const allIndustries = await getCollection('industries');
+    const industries = filterByLang(allIndustries, lang);
+    
+    return industries.map((industry) => ({
+      params: { slug: getIdSlug(industry.id) },
+      props: { industry },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for industries:', error);
+    return [];
+  }
 }
 
 interface Props {
@@ -28,7 +34,15 @@ if (!industry) {
   return Astro.redirect('/en/404');
 }
 
-const { Content } = await industry.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await industry.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering industry:', error);
+  return Astro.redirect('/en/404');
+}
 ---
 
 <LayoutService title={industry.data.title} description={industry.data.description}>

@@ -1,0 +1,16 @@
+---
+// src/components/ui/ServerIslandExample.astro
+// Пример использования Server Islands (server:defer)
+//
+// Использование в Layout или странице:
+//   import UserAvatar from '@/components/ui/UserAvatar.astro';
+//   <UserAvatar server:defer userId="123">
+//     <div slot="fallback">Loading user...</div>
+//   </UserAvatar>
+//
+// Server Islands улучшают TTFB, отдавая статический shell сразу,
+// а динамический контент подгружается асинхронно.
+
+// Этот файл - только для документации паттерна
+// Реальные компоненты с server:defer создаются по необходимости
+---

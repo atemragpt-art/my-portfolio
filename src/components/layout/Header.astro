@@ -72,6 +72,9 @@ const homeHref = getLocalizedPath('/', lang);
   }
 
   // Запускаем при загрузке и после View Transitions
+  // astro:after-swap - для быстрой синхронной инициализации (без флеша)
+  // astro:page-load - для надёжности (если after-swap не сработал)
   setupMobileMenu();
   document.addEventListener('astro:after-swap', setupMobileMenu);
+  window.addEventListener('astro:page-load', setupMobileMenu);
 </script>

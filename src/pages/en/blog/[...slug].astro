@@ -5,22 +5,29 @@ import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { generateArticleSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
-import { useTranslations, formatDate, getLocalizedPath } from '@/i18n/utils';
+import { useTranslations, formatDate, getLocalizedPath, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'en' as const;
-  
-  const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
-  const blogPosts = filterByLang(allBlogPosts, lang);
-  
-  return blogPosts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+  try {
+    const lang: Lang = 'en';
+    
+    const allBlogPosts = await getCollection('blog', ({ data }) => 
+      import.meta.env.PROD ? !data.draft : true
+    );
+    const blogPosts = filterByLang(allBlogPosts, lang);
+    
+    return blogPosts.map((post) => ({
+      params: { slug: getIdSlug(post.id) },
+      props: { post },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for blog:', error);
+    return [];
+  }
 }
 
 interface Props {
@@ -34,7 +41,15 @@ if (!post) {
   return Astro.redirect('/en/404');
 }
 
-const { Content } = await post.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await post.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering blog post:', error);
+  return Astro.redirect('/en/404');
+}
 
 const articleSchema = generateArticleSchema({
   headline: post.data.title,

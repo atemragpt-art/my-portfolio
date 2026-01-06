@@ -7,9 +7,10 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByFeatured } from '@/utils/sorting';
-import { filterByLang } from '@/utils/content';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
-const lang = 'ru' as const;
+const lang: Lang = 'ru';
 const allExpertiseItems = await getCollection('expertise');
 const expertiseItems = filterByLang(allExpertiseItems, lang);
 const sortedExpertise = sortByFeatured(expertiseItems);
@@ -34,7 +35,7 @@ const sortedExpertise = sortByFeatured(expertiseItems);
                 ))}
               </div>
             )}
-            <Button href={`/expertise/${item.slug}`}>Подробнее</Button>
+            <Button href={`/expertise/${getIdSlug(item.id)}`}>Подробнее</Button>
           </Card>
         ))}
       </div>

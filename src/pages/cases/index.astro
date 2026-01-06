@@ -7,9 +7,10 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByFeatured } from '@/utils/sorting';
-import { filterByLang } from '@/utils/content';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
-const lang = 'ru' as const;
+const lang: Lang = 'ru';
 const allCases = await getCollection('cases');
 const cases = filterByLang(allCases, lang);
 const sortedCases = sortByFeatured(cases);
@@ -26,7 +27,7 @@ const sortedCases = sortByFeatured(cases);
         {sortedCases.map((caseItem) => (
           <Card featured={caseItem.data.featured} featuredLabel="Рекомендуемый">
             <h2 class="text-2xl font-semibold mb-2">
-              <a href={`/cases/${caseItem.slug}`} class="hover:text-blue-600 dark:hover:text-blue-400" data-astro-prefetch>
+              <a href={`/cases/${getIdSlug(caseItem.id)}`} class="hover:text-blue-600 dark:hover:text-blue-400" data-astro-prefetch>
                 {caseItem.data.title}
               </a>
             </h2>

@@ -5,18 +5,24 @@ import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { generateProfessionalServiceSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'ru' as const;
-  
-  const allServices = await getCollection('services');
-  const services = filterByLang(allServices, lang);
-  
-  return services.map((service) => ({
-    params: { slug: service.slug },
-    props: { service },
-  }));
+  try {
+    const lang: Lang = 'ru';
+    
+    const allServices = await getCollection('services');
+    const services = filterByLang(allServices, lang);
+    
+    return services.map((service) => ({
+      params: { slug: getIdSlug(service.id) },
+      props: { service },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for solutions:', error);
+    return [];
+  }
 }
 
 interface Props {
@@ -30,7 +36,15 @@ if (!service) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await service.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await service.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering service:', error);
+  return Astro.redirect('/404');
+}
 
 const serviceSchema = generateProfessionalServiceSchema({
   name: service.data.title,

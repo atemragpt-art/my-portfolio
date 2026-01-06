@@ -6,14 +6,14 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByFeatured } from '@/utils/sorting';
-import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 // Фильтруем кейсы по языку
 const allCases = await getCollection('cases');
-const { filterByLang } = await import('@/utils/content');
 const cases = filterByLang(allCases, lang);
 const sortedCases = sortByFeatured(cases);
 ---
@@ -33,7 +33,7 @@ const sortedCases = sortByFeatured(cases);
           <Card featured={caseItem.data.featured} featuredLabel="Featured">
             <h2 class="text-2xl font-semibold mb-2">
               <a 
-                href={getLocalizedPath(`/cases/${caseItem.slug}`, lang)} 
+                href={getLocalizedPath(`/cases/${getIdSlug(caseItem.id)}`, lang)} 
                 class="hover:text-blue-600 dark:hover:text-blue-400" 
                 data-astro-prefetch
               >

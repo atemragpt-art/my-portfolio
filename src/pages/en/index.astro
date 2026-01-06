@@ -5,9 +5,9 @@ import Button from '@/components/ui/Button.astro';
 import CooperationModels from '@/components/sections/CooperationModels.astro';
 import { generateOrganizationSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
-import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 const organizationSchema = generateOrganizationSchema({

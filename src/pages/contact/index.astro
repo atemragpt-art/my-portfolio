@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button.astro';
   <Section>
     <h1 class="text-4xl font-bold mb-6">Свяжитесь с нами</h1>
     
-    <form method="POST" action="/api/contact" class="max-w-2xl" id="contact-form">
+    <form class="max-w-2xl" id="contact-form">
       <Input
         id="name"
         name="name"
@@ -48,42 +48,70 @@ import Button from '@/components/ui/Button.astro';
 </LayoutMain>
 
 <script>
-  const form = document.getElementById('contact-form') as HTMLFormElement;
-  const messageDiv = document.getElementById('form-message') as HTMLDivElement;
+  // Инициализация формы при загрузке и после View Transitions
+  async function setupContactForm() {
+    const { actions, isInputError } = await import('astro:actions');
+    const form = document.getElementById('contact-form') as HTMLFormElement;
+    const messageDiv = document.getElementById('form-message') as HTMLDivElement;
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(form);
-    messageDiv.classList.add('hidden');
-    
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        body: formData,
-      });
+    if (!form || !messageDiv) return;
+
+    // Удаляем старые обработчики, если есть
+    const newForm = form.cloneNode(true) as HTMLFormElement;
+    form.parentNode?.replaceChild(newForm, form);
+
+    newForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      const result = await response.json();
+      const formData = new FormData(newForm);
+      messageDiv.classList.add('hidden');
       
-      if (result.success) {
-        messageDiv.className = 'mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-lg';
-        messageDiv.textContent = result.message;
-        messageDiv.classList.remove('hidden');
-        form.reset();
+      try {
+        const input = {
+          name: formData.get('name')?.toString() || '',
+          contact: formData.get('contact')?.toString() || '',
+          message: formData.get('message')?.toString() || '',
+        };
+
+        const { data, error } = await actions.submitContactForm(input);
         
-        // Перенаправление на страницу успеха через 2 секунды
-        setTimeout(() => {
-          window.location.href = '/form-success';
-        }, 2000);
-      } else {
+        if (error) {
+          // Проверяем, это ошибка валидации?
+          if (isInputError(error)) {
+            // Показываем ошибки валидации
+            const errorMessages = Object.values(error.fields)
+              .flat()
+              .map((err) => err.message)
+              .join(', ');
+            messageDiv.className = 'mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg';
+            messageDiv.textContent = `Ошибка валидации: ${errorMessages}`;
+            messageDiv.classList.remove('hidden');
+          } else {
+            // Другие ошибки
+            messageDiv.className = 'mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg';
+            messageDiv.textContent = error.message || 'Произошла ошибка при отправке формы';
+            messageDiv.classList.remove('hidden');
+          }
+        } else if (data?.success) {
+          messageDiv.className = 'mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-lg';
+          messageDiv.textContent = data.message || 'Сообщение успешно отправлено';
+          messageDiv.classList.remove('hidden');
+          newForm.reset();
+          
+          // Перенаправление на страницу успеха через 2 секунды
+          setTimeout(() => {
+            window.location.href = '/form-success';
+          }, 2000);
+        }
+      } catch (error) {
         messageDiv.className = 'mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg';
-        messageDiv.textContent = result.message || 'Произошла ошибка при отправке формы';
+        messageDiv.textContent = 'Произошла ошибка при отправке формы. Попробуйте позже.';
         messageDiv.classList.remove('hidden');
       }
-    } catch (error) {
-      messageDiv.className = 'mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg';
-      messageDiv.textContent = 'Произошла ошибка при отправке формы. Попробуйте позже.';
-      messageDiv.classList.remove('hidden');
-    }
-  });
+    });
+  }
+
+  // Запускаем при загрузке и после View Transitions
+  setupContactForm();
+  window.addEventListener('astro:page-load', setupContactForm);
 </script>

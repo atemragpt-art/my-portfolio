@@ -7,10 +7,14 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByDate } from '@/utils/sorting';
-import { filterByLang } from '@/utils/content';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
-const lang = 'ru' as const;
-const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
+const lang: Lang = 'ru';
+// В production скрываем draft посты, в dev показываем все
+const allBlogPosts = await getCollection('blog', ({ data }) => 
+  import.meta.env.PROD ? !data.draft : true
+);
 const blogPosts = filterByLang(allBlogPosts, lang);
 const sortedPosts = sortByDate(blogPosts);
 ---
@@ -26,7 +30,7 @@ const sortedPosts = sortByDate(blogPosts);
         {sortedPosts.map((post) => (
           <Card>
             <h2 class="text-2xl font-semibold mb-2">
-              <a href={`/blog/${post.slug}`} class="hover:text-blue-600 dark:hover:text-blue-400" data-astro-prefetch>
+              <a href={`/blog/${getIdSlug(post.id)}`} class="hover:text-blue-600 dark:hover:text-blue-400" data-astro-prefetch>
                 {post.data.title}
               </a>
             </h2>

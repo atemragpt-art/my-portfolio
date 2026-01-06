@@ -7,14 +7,14 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByFeatured } from '@/utils/sorting';
-import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 // Фильтруем экспертизу по языку
 const allExpertiseItems = await getCollection('expertise');
-const { filterByLang } = await import('@/utils/content');
 const expertiseItems = filterByLang(allExpertiseItems, lang);
 const sortedExpertise = sortByFeatured(expertiseItems);
 ---
@@ -41,7 +41,7 @@ const sortedExpertise = sortByFeatured(expertiseItems);
                 ))}
               </div>
             )}
-            <Button href={getLocalizedPath(`/expertise/${item.slug}`, lang)}>{t('common.readMore')}</Button>
+            <Button href={getLocalizedPath(`/expertise/${getIdSlug(item.id)}`, lang)}>{t('common.readMore')}</Button>
           </Card>
         ))}
       </div>

@@ -8,14 +8,14 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByCategory } from '@/utils/sorting';
-import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 // Фильтруем услуги по языку
 const allServices = await getCollection('services');
-const { filterByLang } = await import('@/utils/content');
 const services = filterByLang(allServices, lang);
 const sortedServices = sortByCategory(services, ['nc-programming', 'postprocessors', 'simulation', 'other']);
 ---
@@ -42,7 +42,7 @@ const sortedServices = sortByCategory(services, ['nc-programming', 'postprocesso
                 ))}
               </div>
             )}
-            <Button href={getLocalizedPath(`/solutions/${service.slug}`, lang)}>{t('common.readMore')}</Button>
+            <Button href={getLocalizedPath(`/solutions/${getIdSlug(service.id)}`, lang)}>{t('common.readMore')}</Button>
           </Card>
         ))}
       </div>

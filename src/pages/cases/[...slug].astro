@@ -3,18 +3,24 @@ import { getCollection } from 'astro:content';
 import LayoutPost from '@/layouts/LayoutPost.astro';
 import Section from '@/components/ui/Section.astro';
 import { generateCaseStudySchema } from '@/utils/schema';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'ru' as const;
-  
-  const allCases = await getCollection('cases');
-  const cases = filterByLang(allCases, lang);
-  
-  return cases.map((caseItem) => ({
-    params: { slug: caseItem.slug },
-    props: { caseItem },
-  }));
+  try {
+    const lang: Lang = 'ru';
+    
+    const allCases = await getCollection('cases');
+    const cases = filterByLang(allCases, lang);
+    
+    return cases.map((caseItem) => ({
+      params: { slug: getIdSlug(caseItem.id) },
+      props: { caseItem },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for cases:', error);
+    return [];
+  }
 }
 
 interface Props {
@@ -28,7 +34,15 @@ if (!caseItem) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await caseItem.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await caseItem.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering case:', error);
+  return Astro.redirect('/404');
+}
 
 const caseStudySchema = generateCaseStudySchema({
   name: caseItem.data.title,

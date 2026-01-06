@@ -6,14 +6,14 @@ import Button from '@/components/ui/Button.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
-import { useTranslations, getLocalizedPath } from '@/i18n/utils';
+import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 // Фильтруем отрасли по языку
 const allIndustries = await getCollection('industries');
-const { filterByLang } = await import('@/utils/content');
 const industries = filterByLang(allIndustries, lang);
 ---
 
@@ -39,7 +39,7 @@ const industries = filterByLang(allIndustries, lang);
                 ))}
               </div>
             )}
-            <Button href={getLocalizedPath(`/industries/${industry.slug}`, lang)}>{t('common.readMore')}</Button>
+            <Button href={getLocalizedPath(`/industries/${getIdSlug(industry.id)}`, lang)}>{t('common.readMore')}</Button>
           </Card>
         ))}
       </div>

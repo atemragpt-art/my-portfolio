@@ -1,0 +1,67 @@
+---
+// src/components/ui/HeroImage.astro
+// Компонент для отображения hero-изображений с оптимизацией через astro:assets
+// 
+// Использование:
+// 1. Для изображений из src/assets/ - импортируй и передавай напрямую:
+//    import heroImg from '@/assets/images/hero.jpg';
+//    <HeroImage src={heroImg} alt="..." />
+//
+// 2. Для remote images - используй URL строку (требует настройки image.remotePatterns):
+//    <HeroImage src="https://example.com/image.jpg" alt="..." />
+//
+// 3. Для изображений из Content Collections - используй путь из frontmatter:
+//    <HeroImage src={post.data.heroImage} alt={post.data.title} />
+
+import { Image, getImage } from 'astro:assets';
+
+interface Props {
+  src?: string | ImageMetadata;
+  alt: string;
+  width?: number;
+  height?: number;
+  class?: string;
+}
+
+const { 
+  src, 
+  alt, 
+  width = 1200, 
+  height = 600,
+  class: className = '' 
+} = Astro.props;
+
+// Если изображение не указано, не рендерим компонент
+if (!src) {
+  return null;
+}
+
+// Если src - это уже ImageMetadata (импортированное изображение), используем напрямую
+// Если src - это строка (URL или путь), нужно обработать по-другому
+// Для remote images Astro автоматически оптимизирует, если настроены remotePatterns
+---
+{src && (
+  <div class={`mb-6 ${className}`}>
+    {typeof src === 'string' ? (
+      // Remote image или путь - используем как URL
+      // ВАЖНО: Для remote images нужно настроить image.remotePatterns в astro.config.mjs
+      <img 
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        class="w-full h-auto rounded-lg object-cover"
+        loading="lazy"
+      />
+    ) : (
+      // ImageMetadata - используем оптимизированный Image компонент
+      <Image 
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        class="w-full h-auto rounded-lg object-cover"
+      />
+    )}
+  </div>
+)}

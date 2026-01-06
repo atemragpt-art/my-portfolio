@@ -1,9 +1,9 @@
 ---
 import LayoutMain from '@/layouts/LayoutMain.astro';
 import Section from '@/components/ui/Section.astro';
-import { useTranslations } from '@/i18n/utils';
+import { useTranslations, type Lang } from '@/i18n/utils';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 ---
 

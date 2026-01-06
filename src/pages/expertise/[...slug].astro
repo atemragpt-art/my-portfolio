@@ -3,18 +3,24 @@ import { getCollection } from 'astro:content';
 import LayoutService from '@/layouts/LayoutService.astro';
 import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'ru' as const;
-  
-  const allExpertiseItems = await getCollection('expertise');
-  const expertiseItems = filterByLang(allExpertiseItems, lang);
-  
-  return expertiseItems.map((item) => ({
-    params: { slug: item.slug },
-    props: { item },
-  }));
+  try {
+    const lang: Lang = 'ru';
+    
+    const allExpertiseItems = await getCollection('expertise');
+    const expertiseItems = filterByLang(allExpertiseItems, lang);
+    
+    return expertiseItems.map((item) => ({
+      params: { slug: getIdSlug(item.id) },
+      props: { item },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for expertise:', error);
+    return [];
+  }
 }
 
 interface Props {
@@ -28,7 +34,15 @@ if (!item) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await item.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await item.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering expertise item:', error);
+  return Astro.redirect('/404');
+}
 ---
 
 <LayoutService title={item.data.title} description={item.data.description}>

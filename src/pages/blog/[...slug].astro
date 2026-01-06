@@ -5,18 +5,28 @@ import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { generateArticleSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
+import { getIdSlug } from '@/utils/content';
+import type { Lang } from '@/i18n/utils';
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'ru' as const;
-  
-  const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
-  const blogPosts = filterByLang(allBlogPosts, lang);
-  
-  return blogPosts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+  try {
+    const { filterByLang } = await import('@/utils/content');
+    const lang: Lang = 'ru';
+    
+    const allBlogPosts = await getCollection('blog', ({ data }) => 
+      import.meta.env.PROD ? !data.draft : true
+    );
+    const blogPosts = filterByLang(allBlogPosts, lang);
+    
+    return blogPosts.map((post) => ({
+      params: { slug: getIdSlug(post.id) },
+      props: { post },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for blog:', error);
+    // Возвращаем пустой массив, чтобы страница не падала
+    return [];
+  }
 }
 
 interface Props {
@@ -30,7 +40,15 @@ if (!post) {
   return Astro.redirect('/404');
 }
 
-const { Content } = await post.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await post.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering blog post:', error);
+  return Astro.redirect('/404');
+}
 
 const articleSchema = generateArticleSchema({
   headline: post.data.title,

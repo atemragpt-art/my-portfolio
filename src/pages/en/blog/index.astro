@@ -6,14 +6,17 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import Card from '@/components/ui/Card.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { sortByDate } from '@/utils/sorting';
-import { useTranslations, getLocalizedPath, formatDate } from '@/i18n/utils';
+import { useTranslations, getLocalizedPath, formatDate, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 // Получаем посты блога с фильтрацией по языку
-const allBlogPosts = await getCollection('blog', ({ data }) => !data.draft);
-const { filterByLang } = await import('@/utils/content');
+// В production скрываем draft посты, в dev показываем все
+const allBlogPosts = await getCollection('blog', ({ data }) => 
+  import.meta.env.PROD ? !data.draft : true
+);
 const blogPosts = filterByLang(allBlogPosts, lang);
 const sortedPosts = sortByDate(blogPosts);
 ---
@@ -33,7 +36,7 @@ const sortedPosts = sortByDate(blogPosts);
           <Card>
             <h2 class="text-2xl font-semibold mb-2">
               <a 
-                href={getLocalizedPath(`/blog/${post.slug}`, lang)} 
+                href={getLocalizedPath(`/blog/${getIdSlug(post.id)}`, lang)} 
                 class="hover:text-blue-600 dark:hover:text-blue-400" 
                 data-astro-prefetch
               >

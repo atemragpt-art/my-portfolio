@@ -1,0 +1,53 @@
+---
+// src/components/ui/UserAvatar.astro
+// Пример компонента с Server Islands (server:defer)
+// Используй этот паттерн для компонентов с динамическим контентом,
+// который не требует клиентской интерактивности (персонализация, API данные, медленные запросы)
+
+interface Props {
+  userId?: string;
+  fallbackText?: string;
+}
+
+const { userId, fallbackText = 'User' } = Astro.props;
+
+// Пример: получение данных пользователя (в реальном проекте - из API/БД)
+// Этот компонент будет отрендерен с задержкой (server:defer),
+// что улучшает TTFB - статический shell отдаётся сразу
+async function getUserData(userId?: string) {
+  if (!userId) {
+    return null;
+  }
+  
+  // Имитация медленного запроса
+  // В реальном проекте здесь будет запрос к API или БД
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  return {
+    name: 'John Doe',
+    avatar: '/avatar.jpg',
+  };
+}
+
+const userData = await getUserData(userId);
+---
+
+{userData ? (
+  <div class="flex items-center gap-2">
+    <img 
+      src={userData.avatar} 
+      alt={userData.name}
+      class="w-8 h-8 rounded-full"
+      width="32"
+      height="32"
+    />
+    <span class="text-sm font-medium">{userData.name}</span>
+  </div>
+) : (
+  <div class="flex items-center gap-2">
+    <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+      <span class="text-xs text-gray-600 dark:text-gray-400">{fallbackText[0]}</span>
+    </div>
+    <span class="text-sm font-medium">{fallbackText}</span>
+  </div>
+)}

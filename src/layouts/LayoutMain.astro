@@ -1,5 +1,5 @@
 ---
-import ClientRouter from 'astro/components/ClientRouter.astro';
+import { ClientRouter } from 'astro:transitions';
 import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
 import { getLangFromUrl, getAlternateLinks, getLocalizedPath, getDirection, defaultLang } from '@/i18n/utils';
@@ -80,16 +80,28 @@ if (!Astro.site?.href && import.meta.env.PROD) {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
+    {/* Preload критичных шрифтов (если будут локальные шрифты) */}
+    {/* 
+    <link 
+      rel="preload" 
+      href="/fonts/critical-font.woff2" 
+      as="font" 
+      type="font/woff2" 
+      crossorigin 
+    />
+    */}
+    
     {/* Noto Sans для CJK и арабского */}
+    {/* display=swap уже включен в URL - предотвращает FOIT/FOUT */}
     <link 
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap" 
       rel="stylesheet"
     />
     
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body class="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <ClientRouter />
     <Header lang={lang} />
     <main class="flex-1">
       <slot />

@@ -4,22 +4,27 @@ import LayoutPost from '@/layouts/LayoutPost.astro';
 import Section from '@/components/ui/Section.astro';
 import Badge from '@/components/ui/Badge.astro';
 import { generateCaseStudySchema } from '@/utils/schema';
-import { useTranslations } from '@/i18n/utils';
+import { useTranslations, type Lang } from '@/i18n/utils';
+import { filterByLang, getIdSlug } from '@/utils/content';
 
-const lang = 'en' as const;
+const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 export async function getStaticPaths() {
-  const { filterByLang } = await import('@/utils/content');
-  const lang = 'en' as const;
+  try {
+    const lang: Lang = 'en';
+    
+    const allCases = await getCollection('cases');
+    const cases = filterByLang(allCases, lang);
   
-  const allCases = await getCollection('cases');
-  const cases = filterByLang(allCases, lang);
-  
-  return cases.map((caseItem) => ({
-    params: { slug: caseItem.slug },
-    props: { caseItem },
-  }));
+    return cases.map((caseItem) => ({
+      params: { slug: getIdSlug(caseItem.id) },
+      props: { caseItem },
+    }));
+  } catch (error) {
+    console.error('Error generating static paths for cases:', error);
+    return [];
+  }
 }
 
 interface Props {
@@ -33,7 +38,15 @@ if (!caseItem) {
   return Astro.redirect('/en/404');
 }
 
-const { Content } = await caseItem.render();
+// Обрабатываем ошибки рендеринга контента
+let Content;
+try {
+  const rendered = await caseItem.render();
+  Content = rendered.Content;
+} catch (error) {
+  console.error('Error rendering case:', error);
+  return Astro.redirect('/en/404');
+}
 
 const caseStudySchema = generateCaseStudySchema({
   name: caseItem.data.title,

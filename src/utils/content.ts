@@ -6,6 +6,14 @@ import type { CollectionEntry } from 'astro:content';
 import type { Lang } from '@/i18n/utils';
 
 /**
+ * Извлекает slug из id (убирает расширение .md)
+ * В новом Content Layer API id содержит путь к файлу, например "example-post.md"
+ */
+export function getIdSlug(id: string): string {
+  return id.replace(/\.md$/, '');
+}
+
+/**
  * Фильтрует контент-коллекцию по языку
  */
 export function filterByLang<T extends CollectionEntry<any>>(
@@ -38,7 +46,8 @@ export function getContentByLang<T extends CollectionEntry<any>>(
 }
 
 /**
- * Находит контент по slug и языку
+ * Находит контент по slug (извлечённому из id) и языку
+ * В новом API используем id вместо slug, но извлекаем slug для совместимости с URL
  */
 export function findContentBySlugAndLang<T extends CollectionEntry<any>>(
   items: T[],
@@ -48,7 +57,7 @@ export function findContentBySlugAndLang<T extends CollectionEntry<any>>(
 ): T | undefined {
   // Сначала ищем по текущему языку
   const langItem = items.find(
-    (item) => item.slug === slug && (item.data.lang || 'ru') === lang
+    (item) => getIdSlug(item.id) === slug && (item.data.lang || 'ru') === lang
   );
   
   if (langItem) {
@@ -58,7 +67,7 @@ export function findContentBySlugAndLang<T extends CollectionEntry<any>>(
   // Если не нашли, ищем fallback
   if (lang !== fallbackLang) {
     return items.find(
-      (item) => item.slug === slug && (item.data.lang || 'ru') === fallbackLang
+      (item) => getIdSlug(item.id) === slug && (item.data.lang || 'ru') === fallbackLang
     );
   }
   

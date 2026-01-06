@@ -1,5 +1,18 @@
-import { z } from 'zod';
+// src/actions/index.ts
+import { defineAction } from 'astro:actions';
+import { z } from 'astro:schema';
 import nodemailer from 'nodemailer';
+import {
+  TELEGRAM_BOT_TOKEN,
+  TELEGRAM_CHAT_ID,
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_SECURE,
+  SMTP_USER,
+  SMTP_PASS,
+  SMTP_FROM,
+  SMTP_TO,
+} from 'astro:env/server';
 
 /**
  * Экранирование HTML для защиты от XSS
@@ -15,17 +28,10 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
 }
 
-// Схема валидации формы
-const contactFormSchema = z.object({
-  name: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
-  contact: z.string().min(3, 'Укажите email или телефон'),
-  message: z.string().min(10, 'Сообщение должно содержать минимум 10 символов'),
-});
-
 // Отправка в Telegram
-async function sendToTelegram(data: z.infer<typeof contactFormSchema>) {
-  const botToken = import.meta.env.TELEGRAM_BOT_TOKEN;
-  const chatId = import.meta.env.TELEGRAM_CHAT_ID;
+async function sendToTelegram(data: { name: string; contact: string; message: string }) {
+  const botToken = TELEGRAM_BOT_TOKEN;
+  const chatId = TELEGRAM_CHAT_ID;
 
   if (!botToken || !chatId) {
     console.warn('Telegram credentials not configured');
@@ -56,14 +62,14 @@ async function sendToTelegram(data: z.infer<typeof contactFormSchema>) {
 }
 
 // Отправка Email через Nodemailer
-async function sendEmail(data: z.infer<typeof contactFormSchema>) {
-  const smtpHost = import.meta.env.SMTP_HOST;
-  const smtpPort = import.meta.env.SMTP_PORT;
-  const smtpSecure = import.meta.env.SMTP_SECURE === 'true';
-  const smtpUser = import.meta.env.SMTP_USER;
-  const smtpPass = import.meta.env.SMTP_PASS;
-  const smtpFrom = import.meta.env.SMTP_FROM || smtpUser;
-  const smtpTo = import.meta.env.SMTP_TO;
+async function sendEmail(data: { name: string; contact: string; message: string }) {
+  const smtpHost = SMTP_HOST;
+  const smtpPort = SMTP_PORT;
+  const smtpSecure = SMTP_SECURE === 'true';
+  const smtpUser = SMTP_USER;
+  const smtpPass = SMTP_PASS;
+  const smtpFrom = SMTP_FROM || smtpUser;
+  const smtpTo = SMTP_TO;
 
   if (!smtpHost || !smtpUser || !smtpPass || !smtpTo) {
     console.warn('SMTP credentials not configured');
@@ -72,12 +78,12 @@ async function sendEmail(data: z.infer<typeof contactFormSchema>) {
 
   try {
     const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: parseInt(smtpPort || '587'),
+      host: smtpHost!,
+      port: parseInt(smtpPort || '587', 10),
       secure: smtpSecure,
       auth: {
-        user: smtpUser,
-        pass: smtpPass,
+        user: smtpUser!,
+        pass: smtpPass!,
       },
     });
 
@@ -100,42 +106,30 @@ async function sendEmail(data: z.infer<typeof contactFormSchema>) {
   }
 }
 
-// Основная функция обработки формы
-export async function submitContactForm(formData: FormData) {
-  try {
-    // Извлекаем данные из FormData
-    const rawData = {
-      name: formData.get('name')?.toString() || '',
-      contact: formData.get('contact')?.toString() || '',
-      message: formData.get('message')?.toString() || '',
-    };
+// Экспортируем Actions
+export const server = {
+  submitContactForm: defineAction({
+    input: z.object({
+      name: z.string().min(2, 'Имя должно содержать минимум 2 символа'),
+      contact: z.string().min(3, 'Укажите email или телефон'),
+      message: z.string().min(10, 'Сообщение должно содержать минимум 10 символов'),
+    }),
+    handler: async (input) => {
+      try {
+        // Отправляем в Telegram и Email параллельно
+        await Promise.allSettled([
+          sendToTelegram(input),
+          sendEmail(input),
+        ]);
 
-    // Валидация через Zod
-    const validatedData = contactFormSchema.parse(rawData);
-
-    // Отправляем в Telegram и Email параллельно
-    await Promise.allSettled([
-      sendToTelegram(validatedData),
-      sendEmail(validatedData),
-    ]);
-
-    return {
-      success: true,
-      message: 'Сообщение успешно отправлено',
-    };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: 'Ошибка валидации',
-        errors: error.errors,
-      };
-    }
-
-    console.error('Form submission error:', error);
-    return {
-      success: false,
-      message: 'Произошла ошибка при отправке формы',
-    };
-  }
-}
+        return {
+          success: true,
+          message: 'Сообщение успешно отправлено',
+        };
+      } catch (error) {
+        console.error('Form submission error:', error);
+        throw new Error('Произошла ошибка при отправке формы');
+      }
+    },
+  }),
+};
