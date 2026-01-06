@@ -1,0 +1,226 @@
+---
+alwaysApply: true
+---
+# Debugging & Refactoring Workflow
+
+## Stage 1: Project Audit
+
+**Goal:** Create comprehensive audit of codebase compliance with @[projectrule.mdc]
+
+**PROMPT:**
+```
+Analyze the entire project (@Codebase) based on rules from @[projectrule.mdc].
+Your task: Create AUDIT_DRAFT.md listing violations, NOT writing code.
+
+Check these categories systematically:
+
+### Config & Environment
+- [ ] astro.config.mjs: Astro 5.x, output mode ('server' or 'static'), adapter configured
+- [ ] Tailwind v4+ setup (CSS-first approach, @tailwindcss/vite plugin)
+- [ ] astro:env usage (not import.meta.env), validateSecrets: true enabled
+- [ ] image.remotePatterns configured (not deprecated domains)
+- [ ] Sharp image service (Squoosh removed)
+
+### Structure & Imports
+- [ ] ALL imports use @/ alias (no relative ../../ paths)
+- [ ] Folder structure: src/actions/, src/content/, src/components/ui|sections|layout/
+- [ ] src/env.d.ts exists with /// <reference types="astro/client" />
+- [ ] Every page wrapped in <Layout /> (no standalone pages)
+- [ ] Only ONE <main> per page (child layouts use <article>/<section>)
+
+### Routing & Transitions
+- [ ] <ClientRouter /> from astro:transitions in Layout <head> (NOT <ViewTransitions />)
+- [ ] Client scripts use astro:page-load or astro:after-swap (not DOMContentLoaded/load)
+- [ ] data-astro-prefetch on primary navigation links
+- [ ] data-astro-rerun + is:inline for scripts that must re-execute
+
+### TypeScript & Data Flow
+- [ ] ALL components/pages define interface Props
+- [ ] Dynamic routes check undefined before .render()
+- [ ] Server-side async wrapped in try/catch with error logging
+- [ ] Client islands handle loading, error, empty states
+
+### Forms & Actions
+- [ ] Forms use Astro Actions (astro:actions), not API routes
+- [ ] Actions defined in src/actions/index.ts with Zod schemas (astro:schema)
+- [ ] Client-side checks isInputError for validation errors
+- [ ] Manual redirects after successful submission (cookie-redirects removed)
+
+### Security
+- [ ] User input escaped with escapeHtml() before HTML insertion
+- [ ] Environment variables use astro:env (not import.meta.env)
+- [ ] CSRF protection enabled (security.checkOrigin: true)
+
+### Performance
+- [ ] ALL images use <Image /> from astro:assets with width/height
+- [ ] Images imported from src/assets/ (not public/)
+- [ ] Server Islands (server:defer) used for dynamic non-interactive components
+- [ ] client:visible for lazy hydration (avoid client:load unless critical)
+- [ ] font-display: swap in @font-face, critical fonts preloaded
+
+### Content Collections
+- [ ] Content Layer API: src/content.config.ts (not src/content/config.ts)
+- [ ] loader: glob() instead of type: 'content'
+- [ ] Reference by id instead of slug
+- [ ] Zod schemas for type validation
+- [ ] filterByLang() used for i18n content filtering
+
+### i18n (if applicable)
+- [ ] getLocalizedPath() for all internal links
+- [ ] lang field in all content collection schemas
+- [ ] i18n.locales lists ONLY languages with existing pages
+
+### SEO & A11y
+- [ ] Absolute URLs for OG tags, canonical, hreflang
+- [ ] Schema.org structured data (JSON-LD)
+- [ ] Semantic HTML (<header>, <nav>, <main>, <section>, <article>, <footer>)
+- [ ] One <h1> per page
+- [ ] Interactive elements have visible text or aria-label
+- [ ] Meaningful alt text for all images
+
+### Deprecations & v6 Readiness
+- [ ] No legacy Content Collections API (src/content/config.ts with type: 'content')
+- [ ] No deprecated @astrojs/tailwind (use @tailwindcss/vite)
+- [ ] No experimental flags (server:defer works out-of-the-box)
+- [ ] Check v6.docs.astro.build for breaking changes
+
+**Output Format:**
+For each violation, list:
+- File path
+- Line number (if applicable)
+- Rule violated
+- Current code (snippet)
+- Expected behavior
+
+**Post-Action:** If project is large, run audit per layer (config → pages → components → utils).
+```
+
+## Stage 2: Critique & Optimization
+
+**Goal:** Review audit, find gaps, group tasks, prioritize
+
+**PROMPT:**
+```
+Critically evaluate AUDIT_DRAFT.md, cross-referencing with @[projectrule.mdc].
+
+### Gap Analysis
+1. What did you miss?
+   - [ ] isInputError checks in Actions client code
+   - [ ] try/catch in SSR async operations
+   - [ ] Guard clauses in dynamic routes
+   - [ ] escapeHtml usage in email/telegram messages
+   - [ ] Content Layer migration completeness
+   - [ ] TypeScript strict mode violations (any types)
+
+2. Can fixes be combined?
+   - Group related changes (e.g., i18n + routing fixes)
+   - Batch file updates (e.g., all Props interfaces in one step)
+   - Config changes together (astro.config.mjs + env setup)
+
+3. Are new Astro 5 features applicable?
+   - Replace heavy islands with Server Islands (server:defer)
+   - Migrate to Content Layer API
+   - Use astro:env instead of import.meta.env
+
+### Prioritization
+Divide into:
+- **Critical:** Security (XSS, env vars), Type safety (Props, undefined checks), SSR stability (middleware, error handling)
+- **Medium:** Performance (Images, Islands, CLS), i18n compliance, SEO meta tags
+- **Low:** Styling tweaks (Tailwind classes), code organization, documentation
+
+### Output: REFACTORING_PLAN.md
+Structure:
+```markdown
+# Refactoring Plan
+
+## Critical Priority
+
+### Step 1: Security & Environment Variables
+- Files: astro.config.mjs, src/env.d.ts, [list files using import.meta.env]
+- Changes: Migrate to astro:env, enable validateSecrets, add escapeHtml utility
+- Dependencies: None
+- Test: npm run build, check env validation errors
+
+### Step 2: Type Safety & Props
+- Files: [list pages/components without Props interface]
+- Changes: Add interface Props to all components/pages
+- Dependencies: None
+- Test: npm run dev, check TypeScript errors
+
+[... continue for each step ...]
+
+## Medium Priority
+[...]
+
+## Low Priority
+[...]
+```
+
+Each step must be:
+- Atomic (can be executed independently)
+- Testable (clear test plan)
+- Reversible (can be rolled back if issues)
+```
+
+## Stage 3: Step-by-Step Execution
+
+**Goal:** Apply changes cleanly, one step at a time
+
+**PROMPT (repeat for each step):**
+```
+Execute Step [N] from REFACTORING_PLAN.md.
+
+**Strict Requirements:**
+1. Follow response format from @[projectrule.mdc]:
+   - Start with file path: // src/path/to/file.astro
+   - Provide FULL file content (not snippets)
+   - Add "The Why" section in Russian:
+     - **Суть:** [What changed/added - 1 sentence]
+     - **Pro-Tip:** [Why better - perf/safety/Astro-specific - 1 sentence]
+
+2. Ensure changes:
+   - Match Astro 5.x requirements
+   - Maintain backward compatibility where possible
+   - Include error handling (try/catch, guard clauses)
+   - Use @/ imports (no relative paths)
+
+3. After code, provide test plan:
+   ```markdown
+   ## Test Plan
+   - [ ] npm run dev — check for runtime errors
+   - [ ] npm run build — verify production build
+   - [ ] Check specific functionality: [describe what to test]
+   - [ ] Lighthouse audit: [FCP, CLS, bundle size if applicable]
+   ```
+
+4. If step modifies astro.config.mjs:
+   - Verify output: 'server' or 'static' correctly set
+   - Verify adapter configured (if SSR)
+   - Verify astro:env schema with validateSecrets: true
+   - Verify image.remotePatterns (if remote images used)
+
+**Post-Action:**
+1. Apply generated code to project
+2. Run test plan
+3. If errors occur, create follow-up prompt:
+   "Review changes from Step [N] against @[projectrule.mdc]. What to fix?"
+4. Commit with message: "Refactor Step [N]: [brief description]"
+```
+
+## Stage 4: Validation (Optional)
+
+**Goal:** Final verification of compliance
+
+**PROMPT:**
+```
+Run final audit on refactored codebase using @[projectrule.mdc].
+
+Create COMPLIANCE_REPORT.md:
+- List remaining violations (if any)
+- Document breaking changes (if any)
+- Note performance improvements (before/after metrics)
+- List migration notes for team
+
+If violations remain, prioritize and create follow-up steps.
+```
+

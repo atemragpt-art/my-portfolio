@@ -231,3 +231,11 @@ const { Content } = await post.render();
     routing: { prefixDefaultLocale: false },
   }
   ```
+
+# Debugging & Refactoring Workflow
+
+For systematic codebase audit and refactoring, see @[codereviewrule.mdc] for step-by-step process:
+1. **Stage 1:** Project audit (create AUDIT_DRAFT.md)
+2. **Stage 2:** Critique & optimization (create REFACTORING_PLAN.md)
+3. **Stage 3:** Step-by-step execution (follow plan, test each step)
+4. **Stage 4:** Final validation (create COMPLIANCE_REPORT.md)
