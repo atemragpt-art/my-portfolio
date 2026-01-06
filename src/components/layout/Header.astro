@@ -1,6 +1,7 @@
 ---
 import Navigation from './Navigation.astro';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher.astro';
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
 import { getLocalizedPath, type Lang } from '@/i18n/utils';
 
 interface Props {
@@ -25,16 +26,18 @@ const homeHref = getLocalizedPath('/', lang);
         Logo
       </a>
 
-      {/* Desktop Navigation + Language Switcher */}
+      {/* Desktop Navigation + Language Switcher + Theme Toggle */}
       <div class="hidden md:flex items-center gap-6">
         <nav class="flex items-center space-x-6">
           <Navigation lang={lang} />
         </nav>
+        <ThemeToggle />
         <LanguageSwitcher />
       </div>
 
       {/* Mobile Menu Button */}
       <div class="flex items-center gap-2 md:hidden">
+        <ThemeToggle />
         <LanguageSwitcher />
         <button
           id="mobile-menu-button"

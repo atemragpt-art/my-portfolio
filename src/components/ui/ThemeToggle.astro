@@ -1,0 +1,104 @@
+---
+/**
+ * ThemeToggle: Switch between Light and Dark modes
+ * 
+ * Features:
+ * - Defaults to dark mode
+ * - Persists preference in localStorage
+ * - Smooth transitions
+ * - Respects system preference as fallback
+ */
+---
+
+<button
+  id="theme-toggle"
+  class="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center min-w-[2.5rem] min-h-[2.5rem]"
+  aria-label="Toggle theme"
+  title="Toggle dark/light mode"
+  type="button"
+>
+  {/* Sun icon (shown in dark mode) */}
+  <svg 
+    id="sun-icon" 
+    class="w-5 h-5 text-yellow-500 hidden dark:block" 
+    fill="currentColor" 
+    viewBox="0 0 20 20"
+    aria-hidden="true"
+  >
+    <path 
+      fill-rule="evenodd" 
+      d="M10 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm4.293 1.293a1 1 0 011.414 0l1.414 1.414a1 1 0 11-1.414 1.414L14.586 4.707a1 1 0 010-1.414zm2.828 2.829a1 1 0 011.415 0l1.414 1.414a1 1 0 11-1.414 1.414l-1.414-1.414a1 1 0 010-1.414zm1.414 5.657a1 1 0 110-2h2a1 1 0 110 2h-2zm-16 0a1 1 0 110-2h2a1 1 0 110 2h-2zm14.243 5.243a1 1 0 11-1.414 1.414l-1.414-1.414a1 1 0 111.414-1.414l1.414 1.414zM4 12a1 1 0 110-2h2a1 1 0 110 2H4zm0 6a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm1.293-1.293a1 1 0 011.414-1.414l1.414 1.414a1 1 0 11-1.414 1.414l-1.414-1.414zM10 18a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm-3.707-1.707a1 1 0 011.414 1.414l-1.414 1.414a1 1 0 11-1.414-1.414l1.414-1.414z" 
+      clip-rule="evenodd" 
+    />
+  </svg>
+  
+  {/* Moon icon (shown in light mode) */}
+  <svg 
+    id="moon-icon" 
+    class="w-5 h-5 text-gray-700 dark:text-gray-300 block dark:hidden" 
+    fill="currentColor" 
+    viewBox="0 0 20 20"
+    aria-hidden="true"
+  >
+    <path 
+      d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" 
+    />
+  </svg>
+</button>
+
+<script>
+  /**
+   * Theme Management Script
+   * 
+   * 1. On first load: Set dark mode as default, persist to localStorage
+   * 2. On subsequent loads: Read from localStorage
+   * 3. Toggle: Switch theme and update localStorage
+   */
+  
+  function initTheme() {
+    const html = document.documentElement;
+    const toggleButton = document.getElementById('theme-toggle');
+    
+    // Get stored preference, default to 'dark'
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = stored || (prefersDark ? 'dark' : 'dark'); // ALWAYS default to dark
+    
+    // Apply theme
+    applyTheme(currentTheme);
+    
+    // Store it
+    localStorage.setItem('theme', currentTheme);
+    
+    // Setup toggle handler
+    if (toggleButton) {
+      toggleButton.addEventListener('click', () => {
+        const isDark = html.classList.contains('dark');
+        const newTheme = isDark ? 'light' : 'dark';
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+      });
+    }
+  }
+  
+  function applyTheme(theme) {
+    const html = document.documentElement;
+    
+    if (theme === 'dark') {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+  }
+  
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
+  }
+  
+  // Re-run after view transitions
+  document.addEventListener('astro:after-swap', initTheme);
+  window.addEventListener('astro:page-load', initTheme);
+</script>

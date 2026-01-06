@@ -101,6 +101,17 @@ if (!Astro.site?.href && import.meta.env.PROD) {
     
     <title>{title}</title>
     <ClientRouter />
+    
+    {/* Prevent theme flash: Apply dark mode BEFORE content renders */}
+    <script is:inline>
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = stored || (prefersDark ? 'dark' : 'dark');
+      
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
   </head>
   <body class="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <Header lang={lang} />

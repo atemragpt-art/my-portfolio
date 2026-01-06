@@ -784,4 +784,108 @@ i18n: {
 
 ---
 
-**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации)
+---
+
+## 🗂️ Управление проектом
+
+### Исторические документы
+
+**✅ Правильно (организация):**
+```bash
+# Создай папку docs/ для исторических документов
+mkdir docs/
+
+# Перемести исторические документы
+mv COMMENTS_ANALYSIS.md docs/
+mv REVIEW_ANALYSIS.md docs/
+mv WORK_PLAN.md docs/
+
+# Добавь в .gitignore
+echo "docs/" >> .gitignore
+```
+
+**Pro-Tip:** Всегда отправляй исторические документы (анализы, планы работ, инструкции, которые уже не актуальны) в папку `docs/` и исключи её из Git через `.gitignore`. Это сохраняет историю для справки, но не засоряет репозиторий. Актуальную документацию (README.md, DEPLOY.md, PRO_TIPS.md) оставляй в корне проекта.
+
+### Исключение файлов из Git
+
+**✅ Правильно (comprehensive .gitignore):**
+```gitignore
+# Build output
+dist/
+.output/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# Cache & temp files
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+.sass-cache/
+.stylelintcache
+
+# Build & deployment
+.vercel/
+.turbo/
+.next/
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js.snap
+.vscode-test/
+
+# Security (private keys, certificates)
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+
+# Lock files (keep package-lock.json, ignore others)
+yarn.lock
+bun.lock
+pnpm-lock.yaml
+
+# Historical documentation
+docs/
+```
+
+**Pro-Tip:** Настрой `.gitignore` сразу при создании проекта. Включай стандартные паттерны для кэша, временных файлов, приватных ключей и артефактов сборки. Это предотвращает случайный коммит чувствительных данных и временных файлов, которые могут создаваться инструментами сборки и IDE.
+
+### Удаление неиспользуемых зависимостей и папок
+
+**✅ Правильно (проверка перед удалением):**
+```bash
+# 1. Проверь, используется ли папка/файл в проекте
+grep -r "cursor-talk-to-figma-mcp" . --exclude-dir=node_modules
+
+# 2. Проверь зависимости в package.json
+grep "cursor-talk-to-figma-mcp" package.json
+
+# 3. Если не используется - удали
+rm -rf cursor-talk-to-figma-mcp/
+```
+
+**Pro-Tip:** Перед удалением папок или файлов всегда проверяй, используются ли они в проекте (через `grep` или поиск по коду). Если файлы не используются MCP сервером или основным проектом, удаляй их целиком. Это поддерживает чистоту проекта и уменьшает размер репозитория.
+
+---
+
+**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации, управление проектом)

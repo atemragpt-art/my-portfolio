@@ -14,11 +14,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
-.env
-.env.production
-.env.local
-
 # OS
 .DS_Store
 Thumbs.db
@@ -26,6 +21,48 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
+
+# Environment variables (all variants)
+.env
+.env.*
+!.env.example
+*.local
+
+# Build & deployment
+.vercel/
+.turbo/
+.next/
+
+# Cache & temp files
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+.sass-cache/
+.stylelintcache
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js.snap
+.vscode-test/
+
+# Security (private keys, certificates)
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+
+# Lock files (keep package-lock.json, ignore others)
+yarn.lock
+bun.lock
+pnpm-lock.yaml
+
+# Historical documentation (not needed in repo)
+docs/
