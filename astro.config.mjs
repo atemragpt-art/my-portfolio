@@ -2,10 +2,15 @@ import { defineConfig, envField } from 'astro/config';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import node from '@astrojs/node';
+import vercel from '@astrojs/vercel/serverless';
 import sitemap from '@astrojs/sitemap';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Определяем окружение для dual-deploy
+// Vercel автоматически устанавливает VERCEL=1 при сборке
+const isVercel = process.env.VERCEL === '1';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,10 +18,13 @@ export default defineConfig({
   // В Astro 5.0 'hybrid' удален, используем 'server' для SSR
   output: 'server',
   
-  // Node.js адаптер для Docker
-  adapter: node({
-    mode: 'standalone',
-  }),
+  // Динамический выбор адаптера для dual-deploy
+  // VPS (РФ): @astrojs/node в standalone-режиме
+  // Vercel (Мир): @astrojs/vercel/serverless для serverless функций
+  // Для edge функций используй: import vercel from '@astrojs/vercel/edge'
+  adapter: isVercel 
+    ? vercel() // Vercel: serverless (или vercel из '@astrojs/vercel/edge' для edge functions)
+    : node({ mode: 'standalone' }),  // VPS: standalone
   
   // ВАЖНО: Укажи реальный домен перед деплоем (нужен для sitemap и canonical URLs)
   site: 'https://yourdomain.com',

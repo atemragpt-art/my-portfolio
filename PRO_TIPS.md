@@ -516,4 +516,186 @@ i18n: {
 
 ---
 
-**Последнее обновление:** 2026-01-05
+## 🚀 Astro 5.x Content Layer API
+
+### Правильный путь к конфигу контента
+
+**❌ Устарело (legacy API):**
+```typescript
+// src/content/config.ts - старый путь
+import { defineCollection } from 'astro:content';
+```
+
+**✅ Правильно (Content Layer API для Astro 5.x):**
+```typescript
+// src/content.config.ts - новый путь
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro:schema';
+
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string(),
+    lang: z.enum(['ru', 'en']).default('ru'),
+  }),
+});
+```
+
+**Pro-Tip:** В Astro 5.x используется Content Layer API с путем `src/content.config.ts` (не `src/content/config.ts`). Используй `loader: glob()` вместо устаревшего `type: 'content'`. Это новый стандарт для работы с контентом.
+
+---
+
+## 🔄 Dual-Deploy (VPS + Vercel)
+
+### Динамический выбор адаптера
+
+**✅ Правильно (dual-deploy из одного репозитория):**
+```javascript
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
+import vercel from '@astrojs/vercel/serverless'; // или '@astrojs/vercel/edge' для edge functions
+
+const isVercel = process.env.VERCEL === '1';
+
+export default defineConfig({
+  output: 'server',
+  adapter: isVercel 
+    ? vercel() // Vercel: serverless (или vercel из '@astrojs/vercel/edge' для edge functions)
+    : node({ mode: 'standalone' }),
+  // ... остальная конфигурация
+});
+```
+
+**Ограничения Vercel:**
+- **Ephemeral FS:** Не храни файлы локально (FS эфемерна), используй внешнее хранилище (S3, Cloudinary)
+- **Таймауты:** Serverless функции ограничены ~10-60 сек, добавляй graceful degradation
+- **Edge functions:** Ограниченный runtime, не все Node.js API доступны
+
+**Pro-Tip:** Используй условную логику выбора адаптера по `process.env.VERCEL` для деплоя из одного репозитория на VPS (Node) и Vercel. Vercel автоматически устанавливает переменную `VERCEL=1` при сборке. Всегда учитывай ограничения Vercel при написании кода (ephemeral FS, таймауты).
+
+---
+
+## ⚡ Server Islands (server:defer)
+
+### Оптимизация TTFB для динамических компонентов
+
+**❌ Медленно (client:load):**
+```astro
+<Avatar client:load />  // Гидрирует на клиенте, увеличивает bundle
+```
+
+**✅ Быстро (server:defer):**
+```astro
+<Avatar server:defer>
+  <div slot="fallback">Loading...</div>
+</Avatar>
+```
+
+**Pro-Tip:** Используй `server:defer` для динамических компонентов без клиентской интерактивности (например, аватары пользователей, счетчики, данные из API). Это улучшает TTFB (Time To First Byte) и работает out-of-the-box в `output: 'server'`. Используй вместо `client:load` для компонентов, которые не требуют интерактивности — это уменьшает клиентский bundle и ускоряет загрузку.
+
+---
+
+## 📝 Astro Actions - Клиентская обработка ошибок
+
+### Проверка ошибок валидации через isInputError
+
+**❌ Неправильно (не различает типы ошибок):**
+```typescript
+import { actions } from 'astro:actions';
+
+const { data, error } = await actions.submitContactForm(formData);
+if (error) {
+  // Непонятно, это ошибка валидации или сервера?
+  console.error(error);
+}
+```
+
+**✅ Правильно (различает типы ошибок):**
+```typescript
+import { actions, isInputError } from 'astro:actions';
+
+const { data, error } = await actions.submitContactForm(formData);
+
+if (isInputError(error)) {
+  // Ошибки валидации (Zod schema violations)
+  console.error('Validation errors:', error.fields);
+  // Показать ошибки пользователю рядом с полями
+} else if (error) {
+  // Другие ошибки (сеть, сервер)
+  console.error('Server error:', error);
+  // Показать общее сообщение об ошибке
+} else {
+  // Успех
+  window.location.href = '/form-success';
+}
+```
+
+**Pro-Tip:** Всегда используй `isInputError()` для проверки ошибок валидации в Astro Actions. Это позволяет различать ошибки валидации (Zod schema violations) от других ошибок (сеть, сервер) и правильно обрабатывать их в UI. Cookie-redirects удалены в Astro 5 — обрабатывай редиректы вручную через `window.location.href`.
+
+---
+
+## 🔄 Inline скрипты при навигации
+
+### data-astro-rerun для повторного выполнения скриптов
+
+**❌ Проблема (скрипт выполнится только один раз):**
+```astro
+<script is:inline>
+  // Этот скрипт выполнится только при первой загрузке страницы
+  console.log('Page loaded:', window.location.href);
+</script>
+```
+
+**✅ Правильно (скрипт выполнится при каждой навигации):**
+```astro
+<script is:inline data-astro-rerun>
+  // Этот скрипт выполнится при каждой навигации
+  console.log('Page loaded:', window.location.href);
+  // Полезно для аналитики, счетчиков и т.д.
+</script>
+```
+
+**Pro-Tip:** Если inline `<script>` должен выполняться при каждой навигации (например, аналитика, счетчики, инициализация виджетов), добавь `data-astro-rerun` + `is:inline`. Без этих атрибутов inline скрипт выполнится только при первой загрузке страницы, что может привести к проблемам с аналитикой и виджетами при использовании View Transitions.
+
+---
+
+## 🎨 Tailwind CSS v4 - @theme блок
+
+### Опциональность @theme блока
+
+**❌ Неправильное понимание:**
+```css
+/* Думаешь, что @theme обязателен */
+@import "tailwindcss";
+
+@theme {
+  /* Но на самом деле это опционально! */
+}
+```
+
+**✅ Правильно (опциональность):**
+```css
+/* Для дефолтных значений Tailwind достаточно: */
+@import "tailwindcss";
+
+/* @theme нужен ТОЛЬКО для кастомизации: */
+@theme {
+  --color-brand: #3b82f6;
+  --font-display: 'Inter', sans-serif;
+}
+```
+
+**Для сложных случаев:**
+```css
+/* Если нужны плагины или сложная конфигурация: */
+@config "./tailwind.config.js";  /* Используй @config directive */
+/* Или создай tailwind.config.js (не рекомендуется для простых проектов) */
+```
+
+**Pro-Tip:** Блок `@theme` в Tailwind v4 **опционален**. Если используешь дефолтные значения Tailwind, достаточно `@import "tailwindcss"`. Используй `@theme` только для кастомизации (цвета из Figma, кастомные шрифты, значения). Для сложных случаев (плагины) используй `@config` directive в CSS или создай `tailwind.config.js`, но это не рекомендуется для простых проектов.
+
+---
+
+**Последнее обновление:** 2026-01-05 (добавлены Pro-Tips: Content Layer API, Dual-Deploy, Server Islands, Astro Actions isInputError, data-astro-rerun, Tailwind v4 @theme)
