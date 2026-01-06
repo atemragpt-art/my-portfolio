@@ -698,4 +698,90 @@ if (isInputError(error)) {
 
 ---
 
-**Последнее обновление:** 2026-01-05 (добавлены Pro-Tips: Content Layer API, Dual-Deploy, Server Islands, Astro Actions isInputError, data-astro-rerun, Tailwind v4 @theme)
+## 🐛 Server Actions - Promise.allSettled
+
+### Ложноположительный успех при использовании Promise.allSettled
+
+**❌ Опасно (всегда возвращает success):**
+```typescript
+const results = await Promise.allSettled([
+  sendToTelegram(input),
+  sendEmail(input),
+]);
+
+// Проблема: если обе отправки упадут, всё равно вернется success: true
+return { success: true, message: 'Сообщение успешно отправлено' };
+```
+
+**✅ Правильно (проверяем хотя бы один успех):**
+```typescript
+const results = await Promise.allSettled([
+  sendToTelegram(input),
+  sendEmail(input),
+]);
+
+// Проверяем, удалось ли отправить хотя бы куда-то
+const anySuccess = results.some(r => r.status === 'fulfilled');
+
+if (!anySuccess) {
+  console.error('All dispatch methods failed', results);
+  throw new Error('Не удалось отправить сообщение. Свяжитесь с нами по телефону.');
+}
+
+return { success: true, message: 'Сообщение успешно отправлено' };
+```
+
+**Pro-Tip:** `Promise.allSettled()` никогда не выбрасывает ошибку — он всегда возвращает массив результатов. Всегда проверяй `anySuccess` перед возвратом успеха, иначе пользователь получит ложное сообщение об успехе, даже если все операции провалились. Это критично для корректной обработки ошибок в формах.
+
+---
+
+## 🌐 i18n - Синхронизация конфигурации
+
+### Рассинхрон между ui.ts и astro.config.mjs
+
+**❌ Проблема (рассинхрон):**
+```typescript
+// src/i18n/ui.ts
+export const languages = {
+  ru: 'Русский',
+  en: 'English',
+  de: 'Deutsch', // Перевод есть
+  // ... еще 7 языков
+};
+
+// astro.config.mjs
+i18n: {
+  locales: ['ru', 'en'], // Но в роутинге только 2 языка!
+}
+```
+
+**Последствие:** Если пользователь перейдет на `/de/about`, Astro выдаст 404, так как локаль не зарегистрирована в роутинге, даже если переводы есть в `ui.ts`.
+
+**✅ Правильно (синхронизация):**
+```typescript
+// Вариант 1: Добавить все языки с fallback (если хочешь поддержку)
+i18n: {
+  defaultLocale: 'ru',
+  locales: ['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh'],
+  routing: {
+    prefixDefaultLocale: false,
+    fallback: {
+      de: 'en', es: 'en', fr: 'en', pt: 'en', it: 'en', tr: 'en', ar: 'en', zh: 'en'
+    },
+  },
+}
+
+// Вариант 2: Оставить только существующие (рекомендуется)
+i18n: {
+  locales: ['ru', 'en'], // Только языки с существующими страницами
+}
+// В ui.ts добавить комментарий, что переводы подготовлены, но роутинг не настроен
+```
+
+**Pro-Tip:** Всегда синхронизируй языки между `src/i18n/ui.ts` и `astro.config.mjs`. В `i18n.locales` указывай только те языки, для которых реально созданы страницы. Переводы в `ui.ts` можно подготовить заранее, но добавь комментарий, что роутинг не настроен до создания страниц. 
+
+**Важно:** В `src/i18n/utils.ts` используй `routingLocales` (только языки с роутингом) вместо `locales` (все языки с переводами) для функций роутинга (`getLangFromUrl`, `getLocalizedPath`, `getAlternateLinks`). Это предотвращает 404 ошибки при переходе на несуществующие языковые версии.
+
+---
+
+**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации)

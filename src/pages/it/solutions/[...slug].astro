@@ -1,0 +1,10 @@
+---
+/**
+ * Страница-заглушка для динамических маршрутов it языка
+ * Перенаправляет на английскую версию (fallback)
+ */
+import { getLocalizedPath } from '@/i18n/utils';
+
+const slug = Astro.params.slug || '';
+return Astro.redirect(getLocalizedPath(`/solutions/${slug}`, 'en'), 307);
+---

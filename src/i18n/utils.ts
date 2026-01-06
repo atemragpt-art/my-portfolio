@@ -4,15 +4,50 @@
 
 import { ui, defaultLang, languages, isRtl, type Lang, type TranslationKey } from './ui';
 
-// Список всех поддерживаемых языков
+// Список всех языков с переводами (включая подготовленные для будущего)
 export const locales = Object.keys(languages) as Lang[];
 
 /**
+ * ВАЖНО: Список языков с настроенным роутингом в astro.config.mjs
+ * Синхронизировано с i18n.locales в astro.config.mjs
+ * 
+ * Все языки добавлены в роутинг с fallback на 'en' для языков без существующих страниц.
+ * Это предотвращает 404 при переходе на /de/about и других языковых версиях.
+ */
+export const routingLocales: Lang[] = ['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh'];
+
+/**
+ * Маппинг fallback языков (синхронизировано с astro.config.mjs i18n.routing.fallback)
+ * Если для языка нет страницы, используется fallback язык
+ */
+const fallbackMap: Record<Lang, Lang> = {
+  ru: 'ru', // Нет fallback (дефолтный язык)
+  en: 'en', // Нет fallback
+  de: 'en',
+  es: 'en',
+  fr: 'en',
+  pt: 'en',
+  it: 'en',
+  tr: 'en',
+  ar: 'en',
+  zh: 'en',
+};
+
+/**
+ * Получить fallback язык для указанного языка
+ */
+export function getFallbackLang(lang: Lang): Lang {
+  return fallbackMap[lang] || defaultLang;
+}
+
+/**
  * Получить язык из URL
+ * Проверяет только языки с настроенным роутингом (routingLocales)
  */
 export function getLangFromUrl(url: URL): Lang {
   const [, lang] = url.pathname.split('/');
-  if (lang in languages) {
+  // Проверяем только языки с настроенным роутингом
+  if (lang && routingLocales.includes(lang as Lang)) {
     return lang as Lang;
   }
   return defaultLang;
@@ -55,11 +90,18 @@ export function useTranslations(lang: Lang) {
 
 /**
  * Генерация URL для переключения языка
+ * Использует только языки с настроенным роутингом (routingLocales)
  */
 export function getLocalizedPath(currentPath: string, targetLang: Lang): string {
+  // Проверяем, что язык поддерживается в роутинге
+  if (!routingLocales.includes(targetLang)) {
+    // Если язык не поддерживается, возвращаем дефолтный
+    targetLang = defaultLang;
+  }
+  
   // Удаляем текущий язык из пути (если есть)
   const pathWithoutLang = currentPath.replace(
-    new RegExp(`^/(${locales.join('|')})`),
+    new RegExp(`^/(${routingLocales.join('|')})`),
     ''
   ) || '/';
   
@@ -73,18 +115,20 @@ export function getLocalizedPath(currentPath: string, targetLang: Lang): string 
 
 /**
  * Получить все локализованные версии текущей страницы (для hreflang)
+ * Использует только языки с настроенным роутингом (routingLocales)
  */
 export function getAlternateLinks(currentPath: string, siteUrl: string) {
   // Убираем trailing slash из siteUrl
   const baseUrl = siteUrl.replace(/\/$/, '');
   
-  // Очищаем путь от языкового префикса
+  // Очищаем путь от языкового префикса (только из routingLocales)
   const cleanPath = currentPath.replace(
-    new RegExp(`^/(${locales.join('|')})`),
+    new RegExp(`^/(${routingLocales.join('|')})`),
     ''
   ) || '/';
   
-  return locales.map((lang) => ({
+  // Генерируем ссылки только для языков с настроенным роутингом
+  return routingLocales.map((lang) => ({
     lang,
     hreflang: lang === 'zh' ? 'zh-Hans' : lang, // Упрощённый китайский
     href: `${baseUrl}${lang === defaultLang ? '' : `/${lang}`}${cleanPath}`,

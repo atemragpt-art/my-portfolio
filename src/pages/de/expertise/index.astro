@@ -1,0 +1,10 @@
+---
+/**
+ * Страница-заглушка для немецкого языка
+ * Перенаправляет на английскую версию (fallback)
+ */
+import { getLocalizedPath } from '@/i18n/utils';
+
+// Перенаправляем на английскую версию
+return Astro.redirect(getLocalizedPath('/expertise/', 'en'), 307);
+---

@@ -1,10 +1,11 @@
 // src/middleware.ts
 import { defineMiddleware } from 'astro:middleware';
-import { getLangFromUrl, defaultLang, type Lang } from '@/i18n/utils';
+import { getLangFromUrl, getFallbackLang, getLocalizedPath, defaultLang, type Lang } from '@/i18n/utils';
 
 /**
  * Middleware для SSR режима
  * - Устанавливает i18n context из URL
+ * - Обрабатывает fallback для языков без страниц (через Astro i18n fallback)
  * - Обрабатывает базовые ошибки
  */
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -16,6 +17,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.lang = lang;
     
     // Продолжаем обработку запроса
+    // Astro автоматически обработает fallback согласно конфигурации в astro.config.mjs
+    // с fallbackType: 'redirect'
     return await next();
   } catch (error) {
     // Логируем ошибку, но не прерываем запрос

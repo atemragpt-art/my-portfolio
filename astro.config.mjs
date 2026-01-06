@@ -88,41 +88,48 @@ export default defineConfig({
   // Интеграции
   integrations: [
     sitemap({
-      // Генерируем sitemap только для языков с существующими страницами
-      // Остальные языки можно добавить позже, когда будут созданы страницы
+      // Sitemap для всех языков (fallback настроен в i18n.routing.fallback)
       i18n: {
         defaultLocale: 'ru',
         locales: {
           ru: 'ru',
           en: 'en',
-          // TODO: Добавить остальные языки когда будут созданы страницы:
-          // de: 'de', es: 'es', fr: 'fr', pt: 'pt', it: 'it', tr: 'tr', ar: 'ar', zh: 'zh-Hans'
+          de: 'de',
+          es: 'es',
+          fr: 'fr',
+          pt: 'pt',
+          it: 'it',
+          tr: 'tr',
+          ar: 'ar',
+          zh: 'zh-Hans', // Упрощённый китайский для sitemap
         },
       },
     }),
   ],
   
   // i18n конфигурация
-  // Указываем только те языки, для которых есть страницы
-  // Остальные языки можно добавить позже
+  // Все языки добавлены в роутинг с fallback на 'en' для языков без страниц
+  // Это предотвращает 404 при переходе на /de/about и других языковых версиях
   i18n: {
     defaultLocale: 'ru',
-    locales: ['ru', 'en'], // Только языки с существующими страницами
+    locales: ['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh'],
     routing: {
       prefixDefaultLocale: false, // ru: /about, остальные: /en/about
+      // Fallback на 'en' для языков без существующих страниц
+      // Когда будут созданы страницы для конкретного языка, можно убрать его из fallback
+      fallback: {
+        de: 'en',
+        es: 'en',
+        fr: 'en',
+        pt: 'en',
+        it: 'en',
+        tr: 'en',
+        ar: 'en',
+        zh: 'en',
+      },
+      // Тип fallback: 'redirect' перенаправляет на fallback язык, 'rewrite' показывает контент без изменения URL
+      fallbackType: 'redirect',
     },
-    // Fallback для будущих языков (когда будут созданы страницы)
-    // fallback: {
-    //   en: 'ru',
-    //   de: 'en',
-    //   es: 'en',
-    //   fr: 'en',
-    //   pt: 'en',
-    //   it: 'en',
-    //   tr: 'en',
-    //   ar: 'en',
-    //   zh: 'en',
-    // },
   },
   
   // Настройки оптимизации изображений

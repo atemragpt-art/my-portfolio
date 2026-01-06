@@ -1,0 +1,9 @@
+---
+/**
+ * Страница-заглушка для zh языка
+ * Перенаправляет на английскую версию (fallback)
+ */
+import { getLocalizedPath } from '@/i18n/utils';
+
+return Astro.redirect(getLocalizedPath('/faq/', 'en'), 307);
+---

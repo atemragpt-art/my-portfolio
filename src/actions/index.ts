@@ -35,7 +35,8 @@ async function sendToTelegram(data: { name: string; contact: string; message: st
 
   if (!botToken || !chatId) {
     console.warn('Telegram credentials not configured');
-    return;
+    // Выбрасываем ошибку, чтобы Promise.allSettled правильно определил статус
+    throw new Error('Telegram credentials not configured');
   }
 
   // Форматируем текст с HTML для лучшей читаемости (экранируем пользовательские данные)
@@ -73,7 +74,8 @@ async function sendEmail(data: { name: string; contact: string; message: string 
 
   if (!smtpHost || !smtpUser || !smtpPass || !smtpTo) {
     console.warn('SMTP credentials not configured');
-    return;
+    // Выбрасываем ошибку, чтобы Promise.allSettled правильно определил статус
+    throw new Error('SMTP credentials not configured');
   }
 
   try {
@@ -102,7 +104,8 @@ async function sendEmail(data: { name: string; contact: string; message: string 
     });
   } catch (error) {
     console.error('Failed to send email:', error);
-    // Не выбрасываем ошибку, чтобы не прерывать отправку в Telegram
+    // Выбрасываем ошибку, чтобы Promise.allSettled правильно определил статус
+    throw error;
   }
 }
 
@@ -117,10 +120,18 @@ export const server = {
     handler: async (input) => {
       try {
         // Отправляем в Telegram и Email параллельно
-        await Promise.allSettled([
+        const results = await Promise.allSettled([
           sendToTelegram(input),
           sendEmail(input),
         ]);
+
+        // Проверяем, удалось ли отправить хотя бы куда-то
+        const anySuccess = results.some(r => r.status === 'fulfilled');
+
+        if (!anySuccess) {
+          console.error('All dispatch methods failed', results);
+          throw new Error('Не удалось отправить сообщение. Свяжитесь с нами по телефону.');
+        }
 
         return {
           success: true,

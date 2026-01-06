@@ -1,0 +1,9 @@
+---
+/**
+ * Главная страница-заглушка для it языка
+ * Перенаправляет на английскую версию (fallback)
+ */
+import { getLocalizedPath } from '@/i18n/utils';
+
+return Astro.redirect(getLocalizedPath('/', 'en'), 307);
+---
