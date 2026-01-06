@@ -661,6 +661,64 @@ if (isInputError(error)) {
 
 ---
 
+## 🎯 Event Listeners - Предотвращение дублирования
+
+### Дублирование listeners при множественных экземплярах компонента
+
+**❌ Проблема (накопление listeners):**
+```typescript
+// ThemeToggle используется дважды (desktop + mobile)
+// Каждый экземпляр добавляет свои listeners
+function initTheme() {
+  // ...
+  document.addEventListener('astro:after-swap', initTheme); // ❌ Дублируется!
+  window.addEventListener('astro:page-load', initTheme);      // ❌ Дублируется!
+  
+  toggleButton.addEventListener('click', handler); // ❌ Дублируется!
+}
+```
+
+**Последствие:** При каждом view transition `initTheme()` выполняется несколько раз (по количеству экземпляров компонента), что приводит к ненужным DOM операциям и потенциальным багам.
+
+**✅ Правильно (глобальные флаги + event delegation):**
+```typescript
+// Глобальные флаги для предотвращения дублирования
+if (typeof window !== 'undefined') {
+  (window as any).__themeListenersSetup = (window as any).__themeListenersSetup || false;
+  (window as any).__themeTransitionListenersSetup = (window as any).__themeTransitionListenersSetup || false;
+}
+
+// Setup toggle handlers once globally (using event delegation)
+if (typeof window !== 'undefined' && !(window as any).__themeListenersSetup) {
+  (window as any).__themeListenersSetup = true;
+  
+  // Event delegation обрабатывает все кнопки одним listener
+  document.addEventListener('click', (e) => {
+    const toggleButton = (e.target as Element).closest('#theme-toggle');
+    if (toggleButton) {
+      // Обработка клика
+    }
+  });
+}
+
+// Setup transition listeners once globally
+if (typeof window !== 'undefined' && !(window as any).__themeTransitionListenersSetup) {
+  (window as any).__themeTransitionListenersSetup = true;
+  
+  document.addEventListener('astro:after-swap', initTheme);
+  window.addEventListener('astro:page-load', initTheme);
+}
+
+// initTheme() можно вызывать многократно (идемпотентная операция)
+function initTheme() {
+  // Применение темы - безопасно вызывать несколько раз
+}
+```
+
+**Pro-Tip:** Если компонент рендерится несколько раз (например, desktop и mobile версии), используй глобальные флаги на `window` для предотвращения дублирования event listeners. Event delegation (`closest()`) позволяет обрабатывать все экземпляры элемента одним listener. Transition listeners (`astro:after-swap`, `astro:page-load`) регистрируй один раз глобально, а не в каждом экземпляре компонента. Функции инициализации (например, `initTheme()`) должны быть идемпотентными — безопасно вызывать их несколько раз.
+
+---
+
 ## 🎨 Tailwind CSS v4 - @theme блок
 
 ### Опциональность @theme блока
@@ -888,4 +946,4 @@ rm -rf cursor-talk-to-figma-mcp/
 
 ---
 
-**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации, управление проектом)
+**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации, управление проектом, предотвращение дублирования event listeners)
