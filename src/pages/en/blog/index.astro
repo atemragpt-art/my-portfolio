@@ -9,11 +9,14 @@ import { sortByDate } from '@/utils/sorting';
 import { useTranslations, getLocalizedPath, formatDate, type Lang } from '@/i18n/utils';
 import { filterByLang, getIdSlug } from '@/utils/content';
 
+interface Props {}
+
 const lang: Lang = 'en';
 const t = useTranslations(lang);
 
 // Получаем посты блога с фильтрацией по языку
 // В production скрываем draft посты, в dev показываем все
+// Используем import.meta.env.PROD вместо MODE для надежной работы с кастомными build modes
 const allBlogPosts = await getCollection('blog', ({ data }) => 
   import.meta.env.PROD ? !data.draft : true
 );

@@ -309,6 +309,58 @@ import imageSrc from '../assets/image.jpg';
 
 **Pro-Tip:** Всегда используй `<Image />` из `astro:assets` с явными `width` и `height` для избежания CLS (Cumulative Layout Shift).
 
+### Remote images в Astro 5.x
+
+**❌ Неправильно (getImage() не поддерживает remote images):**
+```astro
+---
+import { Image, getImage } from 'astro:assets';
+
+// getImage() НЕ поддерживает remote images в Astro 5.x!
+const optimizedImage = await getImage({ src: 'https://example.com/image.jpg', width: 800, height: 600 });
+---
+<Image src={optimizedImage} />  // Ошибка: getImage() не работает с remote images
+```
+
+**❌ Неправильно (ненужная проверка типа):**
+```astro
+---
+import { Image, type ImageMetadata } from 'astro:assets';
+
+interface Props {
+  src?: string | ImageMetadata;
+  alt: string;
+}
+---
+
+{typeof src === 'string' ? (
+  // ❌ Неоправданно используем <img> для remote images
+  <img src={src} alt={alt} width={800} height={600} />
+) : (
+  <Image src={src} width={800} height={600} alt={alt} />
+)}
+```
+
+**✅ Правильно (используй <Image /> для всех типов):**
+```astro
+---
+import { Image, type ImageMetadata } from 'astro:assets';
+
+interface Props {
+  src?: string | ImageMetadata;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+---
+
+{/* Компонент <Image /> поддерживает как ImageMetadata, так и string URLs */}
+{/* Для remote images требуется настройка image.remotePatterns в astro.config.mjs */}
+<Image src={src} width={width} height={height} alt={alt} />
+```
+
+**Pro-Tip:** В Astro 5.x `getImage()` не поддерживает remote images, но компонент `<Image />` из `astro:assets` **поддерживает** remote images (строковые URL), если они настроены в `image.remotePatterns` в `astro.config.mjs`. Не нужно проверять тип `src` — просто передавай его в `<Image />`, и Astro автоматически определит тип и обработает изображение. Это позволяет использовать единый компонент для всех типов изображений и получать оптимизацию для авторизованных remote источников.
+
 ---
 
 ## 📝 Content Collections
@@ -326,6 +378,24 @@ const blog = defineCollection({
 ```
 
 **Pro-Tip:** Всегда добавляй поле `lang` в схемы контент-коллекций для поддержки мультиязычности, даже если сейчас используешь только один язык.
+
+### Фильтрация draft-постов
+
+**❌ Проблема (не работает с кастомными build modes):**
+```typescript
+const allBlogPosts = await getCollection('blog', ({ data }) => 
+  import.meta.env.MODE === 'production' ? !data.draft : true
+);
+```
+
+**✅ Правильно (надежная проверка):**
+```typescript
+const allBlogPosts = await getCollection('blog', ({ data }) => 
+  import.meta.env.PROD ? !data.draft : true
+);
+```
+
+**Pro-Tip:** Используй `import.meta.env.PROD` вместо `import.meta.env.MODE === 'production'` для фильтрации draft-постов. `PROD` — это булево значение, которое всегда корректно определяет production-сборку, независимо от кастомных build modes (например, `staging`, `preview`). Это делает фильтрацию более надежной и предсказуемой.
 
 ---
 
@@ -429,6 +499,20 @@ i18n: {
 3. Обнови `astro.config.mjs`: добавь язык в `locales`
 4. Обнови sitemap конфигурацию
 5. Добавь контент с `lang: [lang]` в коллекции
+
+---
+
+---
+
+## 🔧 TypeScript & Типизация
+
+### Remote images vs локальные изображения
+
+**Важно:** В Astro 5.x компонент `<Image />` из `astro:assets` поддерживает **оба** типа:
+- `ImageMetadata` (локальные изображения из `src/assets/`)
+- `string` (remote images, если настроены в `image.remotePatterns`)
+
+**Pro-Tip:** Не нужно проверять тип `src` — просто передавай его в `<Image />`. Компонент автоматически определит тип и обработает изображение соответственно. Это упрощает код и позволяет получать оптимизацию для авторизованных remote источников. `getImage()` действительно не поддерживает remote images, но `<Image />` — поддерживает.
 
 ---
 

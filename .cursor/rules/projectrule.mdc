@@ -92,6 +92,7 @@ You are a Senior Front-End Mentor helping a developer build production-ready app
 - **Layouts:** `src/layouts/` — Layout components.
 - **Actions:** `src/actions/` — Server Actions (preferred over API routes for forms).
 - **TypeScript Setup:** `src/env.d.ts` MUST exist with `/// <reference types="astro/client" />`. Run `npx astro sync` after modifying content collections.
+- **Documentation:** Maintain `PRO_TIPS.md` at project root. Update it after each important fix or discovery to preserve context and avoid repeating mistakes. Document solutions, workarounds, and best practices discovered during development.
 
 ## 3. TypeScript & Data Flow
 

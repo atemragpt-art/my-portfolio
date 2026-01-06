@@ -9,6 +9,8 @@ import Badge from '@/components/ui/Badge.astro';
 import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
 import { filterByLang, getIdSlug } from '@/utils/content';
 
+interface Props {}
+
 const lang: Lang = 'en';
 const t = useTranslations(lang);
 

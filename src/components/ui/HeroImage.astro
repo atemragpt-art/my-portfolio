@@ -9,11 +9,12 @@
 //
 // 2. Для remote images - используй URL строку (требует настройки image.remotePatterns):
 //    <HeroImage src="https://example.com/image.jpg" alt="..." />
+//    Компонент <Image /> автоматически оптимизирует remote images, если они настроены в remotePatterns
 //
 // 3. Для изображений из Content Collections - используй путь из frontmatter:
 //    <HeroImage src={post.data.heroImage} alt={post.data.title} />
 
-import { Image, getImage } from 'astro:assets';
+import { Image, type ImageMetadata } from 'astro:assets';
 
 interface Props {
   src?: string | ImageMetadata;
@@ -36,32 +37,18 @@ if (!src) {
   return null;
 }
 
-// Если src - это уже ImageMetadata (импортированное изображение), используем напрямую
-// Если src - это строка (URL или путь), нужно обработать по-другому
-// Для remote images Astro автоматически оптимизирует, если настроены remotePatterns
+// Компонент <Image /> из astro:assets поддерживает как ImageMetadata (локальные),
+// так и string URLs (remote images), если они настроены в image.remotePatterns
+// Astro автоматически определит тип и обработает изображение соответственно
 ---
 {src && (
   <div class={`mb-6 ${className}`}>
-    {typeof src === 'string' ? (
-      // Remote image или путь - используем как URL
-      // ВАЖНО: Для remote images нужно настроить image.remotePatterns в astro.config.mjs
-      <img 
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        class="w-full h-auto rounded-lg object-cover"
-        loading="lazy"
-      />
-    ) : (
-      // ImageMetadata - используем оптимизированный Image компонент
-      <Image 
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        class="w-full h-auto rounded-lg object-cover"
-      />
-    )}
+    <Image 
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      class="w-full h-auto rounded-lg object-cover"
+    />
   </div>
 )}

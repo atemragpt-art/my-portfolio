@@ -9,6 +9,8 @@ import Badge from '@/components/ui/Badge.astro';
 import { filterByLang, getIdSlug } from '@/utils/content';
 import type { Lang } from '@/i18n/utils';
 
+interface Props {}
+
 const lang: Lang = 'ru';
 const allIndustries = await getCollection('industries');
 const industries = filterByLang(allIndustries, lang);

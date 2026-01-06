@@ -129,6 +129,11 @@ export default defineConfig({
     ],
   },
   
+  // Безопасность
+  security: {
+    checkOrigin: true, // CSRF protection включен по умолчанию в Astro 5, но явно указываем для ясности
+  },
+  
   vite: {
     resolve: {
       alias: {

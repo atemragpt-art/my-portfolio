@@ -4,6 +4,8 @@ import Section from '@/components/ui/Section.astro';
 import { generatePersonSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
 
+interface Props {}
+
 const personSchema = generatePersonSchema({
   name: SITE_CONFIG.name,
   jobTitle: 'Технические эксперты',

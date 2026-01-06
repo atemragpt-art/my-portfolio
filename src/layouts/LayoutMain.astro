@@ -39,6 +39,7 @@ const ogImageUrl = ogImage ? `${siteUrl}${ogImage}` : `${siteUrl}/og-image.jpg`;
 const alternateLinks = getAlternateLinks(Astro.url.pathname, siteUrl);
 
 // Предупреждение если site не настроен (только для production)
+// Используем import.meta.env.PROD вместо MODE для надежной работы с кастомными build modes
 if (!Astro.site?.href && import.meta.env.PROD) {
   console.warn('⚠️  Astro.site не настроен в astro.config.mjs. Укажи site URL перед деплоем.');
 }

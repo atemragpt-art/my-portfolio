@@ -11,6 +11,8 @@ import { sortByCategory } from '@/utils/sorting';
 import { filterByLang, getIdSlug } from '@/utils/content';
 import type { Lang } from '@/i18n/utils';
 
+interface Props {}
+
 const lang: Lang = 'ru';
 const allServices = await getCollection('services');
 const services = filterByLang(allServices, lang);

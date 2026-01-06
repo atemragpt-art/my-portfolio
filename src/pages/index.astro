@@ -6,6 +6,8 @@ import CooperationModels from '@/components/sections/CooperationModels.astro';
 import { generateOrganizationSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
 
+interface Props {}
+
 const organizationSchema = generateOrganizationSchema({
   name: SITE_CONFIG.name,
   description: SITE_CONFIG.description,
