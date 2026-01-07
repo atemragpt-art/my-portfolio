@@ -1,48 +1,88 @@
 ---
 /**
  * ThemeToggle: Switch between Light and Dark modes
- * 
- * Features:
- * - Respects system preference on first load
- * - Persists preference in localStorage
- * - Smooth transitions
- * - No theme flash on page load
+ * Обновлен для соответствия дизайн-системе из Figma
  */
+import { Spacing, Tokens } from '@/config/tokens';
 ---
+
+<style>
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 45px;
+    padding: 0;
+    border: 1px solid var(--text-primary);
+    border-radius: var(--spacing-radius-md);
+    background-color: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  .theme-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+
+  .theme-icon-sun {
+    display: none;
+  }
+
+  .dark .theme-icon-sun {
+    display: block;
+  }
+
+  .theme-icon-moon {
+    display: block;
+  }
+
+  .dark .theme-icon-moon {
+    display: none;
+  }
+</style>
 
 <button
   id="theme-toggle"
-  class="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center min-w-[2.5rem] min-h-[2.5rem]"
-  aria-label="Toggle theme"
-  title="Toggle dark/light mode"
+  class="theme-toggle"
+  aria-label="Переключить тему"
+  title="Переключить светлую/тёмную тему"
   type="button"
 >
   {/* Sun icon (shown in dark mode) */}
-  <svg 
-    id="sun-icon" 
-    class="w-5 h-5 text-yellow-500 hidden dark:block" 
-    fill="currentColor" 
+  <svg
+    class="theme-icon theme-icon-sun"
+    fill="currentColor"
     viewBox="0 0 20 20"
     aria-hidden="true"
   >
-    <path 
-      fill-rule="evenodd" 
-      d="M10 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm4.293 1.293a1 1 0 011.414 0l1.414 1.414a1 1 0 11-1.414 1.414L14.586 4.707a1 1 0 010-1.414zm2.828 2.829a1 1 0 011.415 0l1.414 1.414a1 1 0 11-1.414 1.414l-1.414-1.414a1 1 0 010-1.414zm1.414 5.657a1 1 0 110-2h2a1 1 0 110 2h-2zm-16 0a1 1 0 110-2h2a1 1 0 110 2h-2zm14.243 5.243a1 1 0 11-1.414 1.414l-1.414-1.414a1 1 0 111.414-1.414l1.414 1.414zM4 12a1 1 0 110-2h2a1 1 0 110 2H4zm0 6a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm1.293-1.293a1 1 0 011.414-1.414l1.414 1.414a1 1 0 11-1.414 1.414l-1.414-1.414zM10 18a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm-3.707-1.707a1 1 0 011.414 1.414l-1.414 1.414a1 1 0 11-1.414-1.414l1.414-1.414z" 
-      clip-rule="evenodd" 
+    <path
+      fill-rule="evenodd"
+      d="M10 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm4.293 1.293a1 1 0 011.414 0l1.414 1.414a1 1 0 11-1.414 1.414L14.586 4.707a1 1 0 010-1.414zm2.828 2.829a1 1 0 011.415 0l1.414 1.414a1 1 0 11-1.414 1.414l-1.414-1.414a1 1 0 010-1.414zm1.414 5.657a1 1 0 110-2h2a1 1 0 110 2h-2zm-16 0a1 1 0 110-2h2a1 1 0 110 2h-2zm14.243 5.243a1 1 0 11-1.414 1.414l-1.414-1.414a1 1 0 111.414-1.414l1.414 1.414zM4 12a1 1 0 110-2h2a1 1 0 110 2H4zm0 6a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm1.293-1.293a1 1 0 011.414-1.414l1.414 1.414a1 1 0 11-1.414 1.414l-1.414-1.414zM10 18a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1zm-3.707-1.707a1 1 0 011.414 1.414l-1.414 1.414a1 1 0 11-1.414-1.414l1.414-1.414z"
+      clip-rule="evenodd"
     />
   </svg>
-  
+
   {/* Moon icon (shown in light mode) */}
-  <svg 
-    id="moon-icon" 
-    class="w-5 h-5 text-gray-700 dark:text-gray-300 block dark:hidden" 
-    fill="currentColor" 
+  <svg
+    class="theme-icon theme-icon-moon"
+    fill="currentColor"
     viewBox="0 0 20 20"
     aria-hidden="true"
   >
-    <path 
-      d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" 
-    />
+    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
   </svg>
 </button>
 
@@ -57,43 +97,44 @@
    * 2. On subsequent loads: Read from localStorage
    * 3. Toggle: Switch theme and update localStorage
    */
-  
+
   // Global flags to prevent duplicate listener registration
   if (typeof window !== 'undefined') {
     (window as any).__themeListenersSetup = (window as any).__themeListenersSetup || false;
-    (window as any).__themeTransitionListenersSetup = (window as any).__themeTransitionListenersSetup || false;
+    (window as any).__themeTransitionListenersSetup =
+      (window as any).__themeTransitionListenersSetup || false;
     (window as any).__themeInitialLoadSetup = (window as any).__themeInitialLoadSetup || false;
   }
-  
+
   function applyTheme(theme: string) {
     const html = document.documentElement;
-    
+
     if (theme === 'dark') {
       html.classList.add('dark');
     } else {
       html.classList.remove('dark');
     }
   }
-  
+
   function initTheme() {
     // Get stored preference, fallback to system preference
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const currentTheme = stored || (prefersDark ? 'dark' : 'light');
-    
+
     // Apply theme
     applyTheme(currentTheme);
-    
+
     // Store it (only if not already stored to avoid overwriting user choice)
     if (!stored) {
       localStorage.setItem('theme', currentTheme);
     }
   }
-  
+
   // Setup toggle handlers once globally (using event delegation)
   if (typeof window !== 'undefined' && !(window as any).__themeListenersSetup) {
     (window as any).__themeListenersSetup = true;
-    
+
     // Use event delegation to handle all theme-toggle buttons
     document.addEventListener('click', (e) => {
       const toggleButton = (e.target as Element).closest('#theme-toggle');
@@ -106,20 +147,20 @@
       }
     });
   }
-  
+
   // Setup transition listeners once globally
   if (typeof window !== 'undefined' && !(window as any).__themeTransitionListenersSetup) {
     (window as any).__themeTransitionListenersSetup = true;
-    
+
     // Register transition listeners once globally
     document.addEventListener('astro:after-swap', initTheme);
     window.addEventListener('astro:page-load', initTheme);
   }
-  
+
   // Initialize theme on component mount (protected by global flag)
   if (typeof window !== 'undefined' && !(window as any).__themeInitialLoadSetup) {
     (window as any).__themeInitialLoadSetup = true;
-    
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initTheme);
     } else {

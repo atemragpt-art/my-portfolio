@@ -1,0 +1,236 @@
+---
+/**
+ * Hero Section Component
+ * Воссоздан на основе Figma дизайна (Frame 18626492)
+ * Использует дизайн-токены и компоненты из дизайн-системы
+ * 
+ * ВАЖНО: Все изображения должны находиться в src/assets/images/
+ * Использование: import heroImage from '@/assets/images/hero/hero-bg.jpg';
+ */
+
+import Button from '@/components/ui/Button.astro';
+import { Image, type ImageMetadata } from 'astro:assets';
+import { getLocalizedPath, type Lang } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+  /** Локальное изображение из src/assets/images/ (ImageMetadata) */
+  backgroundImage?: ImageMetadata;
+  /** Локальное видео из src/assets/images/ (string или импортированный модуль) */
+  backgroundVideo?: string | { src: string };
+  /** Заголовок (Heading/XL, uppercase) */
+  title?: string;
+  /** Подзаголовок-акцент (Heading/XL, text-brand) */
+  highlight?: string;
+  /** Описание (Body/Large, text-secondary) */
+  description?: string;
+  /** Текст кнопки CTA */
+  ctaText?: string;
+  /** Ссылка для кнопки CTA */
+  ctaHref?: string;
+}
+
+const {
+  lang,
+  backgroundImage,
+  backgroundVideo,
+  title = 'ЭКСПЕРТНАЯ ПОДДЕРЖКА В МЕТАЛЛООБРАБОТКЕ',
+  highlight = 'без найма в штат',
+  description,
+  ctaText = 'Начать проект',
+  ctaHref,
+} = Astro.props;
+
+const defaultCtaHref = getLocalizedPath('/contact/', lang);
+const finalCtaHref = ctaHref || defaultCtaHref;
+---
+
+<style>
+  .hero {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-80) var(--spacing-64);
+    overflow: hidden;
+  }
+
+  .hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .hero-background-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-overlay-scrim); /* scrim-black-40: 40% alpha */
+    z-index: 1;
+  }
+
+  /* Content Stack (Auto Layout Vertical) */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1312px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-32); /* Gap: var(spacing.32) */
+  }
+
+  /* Title: Heading/XL */
+  .hero-title {
+    font-size: 64px;
+    font-weight: 600; /* SemiBold для Heading/XL */
+    line-height: 1.1; /* 110% для Heading/XL */
+    letter-spacing: -0.02em; /* Heading/XL letter-spacing */
+    color: var(--text-primary); /* var(Tokens.Text.text-primary) */
+    margin: 0;
+    text-transform: uppercase; /* Большие буквы */
+  }
+
+  /* Highlight: Heading/XL с brand цветом */
+  .hero-highlight {
+    font-size: 64px;
+    font-weight: 600; /* SemiBold для Heading/XL */
+    line-height: 1.1; /* 110% для Heading/XL */
+    letter-spacing: -0.02em; /* Heading/XL letter-spacing */
+    color: var(--text-brand); /* var(Tokens.Text.text-brand) */
+    margin: 0;
+    text-transform: lowercase; /* Строчные буквы для акцента */
+  }
+
+  /* Subtitle: Body/Large */
+  .hero-description {
+    font-size: 18px;
+    font-weight: 400; /* Regular для Body/Large */
+    line-height: 1.5; /* 150% для Body/Large */
+    letter-spacing: 0;
+    color: var(--text-secondary); /* var(Tokens.Text.text-secondary) */
+    max-width: 600px;
+    margin: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero {
+      padding: var(--spacing-64) var(--spacing-32);
+      min-height: 500px;
+    }
+
+    .hero-title,
+    .hero-highlight {
+      font-size: 48px; /* Heading/L для tablet */
+      line-height: 1.2; /* 120% для Heading/L */
+      letter-spacing: -0.01em;
+    }
+
+    .hero-description {
+      font-size: 16px; /* Body/Base для tablet */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: var(--spacing-48) var(--spacing-16);
+      min-height: 400px;
+    }
+
+    .hero-title,
+    .hero-highlight {
+      font-size: 32px; /* Heading/M для mobile */
+      line-height: 1.25; /* 125% для Heading/M */
+      letter-spacing: 0;
+    }
+
+    .hero-description {
+      font-size: 14px; /* Body/Small для mobile */
+      line-height: 1.4; /* 140% для Body/Small */
+    }
+
+    .hero-content {
+      gap: var(--spacing-24); /* Уменьшаем gap на mobile */
+    }
+  }
+</style>
+
+<section class="hero" role="banner" aria-label="Hero section">
+  {/* Background Video (приоритет) или Image */}
+  {backgroundVideo ? (
+    <video
+      class="hero-background-video"
+      autoplay
+      loop
+      muted
+      playsinline
+      aria-hidden="true"
+      preload="auto"
+    >
+      <source src={typeof backgroundVideo === 'string' ? backgroundVideo : (backgroundVideo.default || backgroundVideo.src)} type="video/mp4" />
+      {/* Fallback на изображение, если видео не поддерживается */}
+      {backgroundImage && (
+        <Image
+          src={backgroundImage}
+          alt=""
+          width={1920}
+          height={800}
+          class="hero-background"
+          aria-hidden="true"
+        />
+      )}
+    </video>
+  ) : backgroundImage ? (
+    <Image
+      src={backgroundImage}
+      alt=""
+      width={1920}
+      height={800}
+      class="hero-background"
+      aria-hidden="true"
+      loading="eager"
+      fetchpriority="high"
+    />
+  ) : null}
+
+  {/* Overlay для читаемости текста */}
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  {/* Content Stack (Auto Layout Vertical) */}
+  <div class="hero-content">
+    {/* Title: Heading/XL */}
+    <h1 class="hero-title">{title}</h1>
+
+    {/* Highlight: Heading/XL с brand цветом */}
+    {highlight && <h2 class="hero-highlight">{highlight}</h2>}
+
+    {/* Subtitle: Body/Large */}
+    {description && <p class="hero-description">{description}</p>}
+
+    {/* Button: Инстанс компонента Button */}
+    {ctaText && (
+      <Button href={finalCtaHref} variant="primary" size="md">
+        {ctaText}
+      </Button>
+    )}
+  </div>
+</section>

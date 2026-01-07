@@ -1,0 +1,178 @@
+---
+/**
+ * Tag/Chip Component
+ * Использует дизайн-токены из tokens.ts
+ * Для категорий, меток, тегов
+ */
+
+import { Tokens, Spacing } from '@/config/tokens';
+
+interface Props {
+  variant?: 'default' | 'primary' | 'outline';
+  size?: 'sm' | 'md';
+  href?: string;
+  removable?: boolean;
+  onRemove?: () => void;
+  ariaLabel?: string;
+  class?: string;
+}
+
+const {
+  variant = 'default',
+  size = 'md',
+  href,
+  removable = false,
+  onRemove,
+  ariaLabel,
+  class: className = '',
+} = Astro.props;
+---
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-8);
+    border-radius: var(--spacing-radius-full);
+    font-weight: 400;
+    line-height: 1.4;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+    border: 1px solid var(--border-ui);
+    background-color: transparent;
+    color: var(--text-primary);
+  }
+
+  .tag-sm {
+    min-height: 24px;
+    padding: 0 var(--spacing-8);
+    font-size: 12px;
+  }
+
+  .tag-md {
+    min-height: 32px;
+    padding: 0 var(--spacing-12);
+    font-size: 14px;
+  }
+
+  .tag-primary {
+    border-color: var(--color-brand-500);
+    color: var(--text-brand);
+  }
+
+  .tag-primary:hover {
+    background-color: rgba(14, 165, 233, 0.06); /* 6% opacity */
+  }
+
+  .tag-outline {
+    border-color: var(--border-ui);
+    color: var(--text-secondary);
+  }
+
+  .tag-outline:hover {
+    background-color: var(--color-neutral-100);
+    border-color: var(--color-neutral-400);
+  }
+
+  .tag-default:hover {
+    background-color: var(--color-neutral-100);
+    border-color: var(--color-neutral-400);
+  }
+
+  .tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: var(--spacing-4);
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .tag-remove:hover {
+    color: var(--text-primary);
+  }
+
+  .tag-remove:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+</style>
+
+{href ? (
+  <a
+    href={href}
+    class:list={['tag', `tag-${size}`, `tag-${variant}`, className]}
+    aria-label={ariaLabel}
+    data-astro-prefetch
+  >
+    <span>
+      <slot />
+    </span>
+    {removable && (
+      <button
+        type="button"
+        class="tag-remove"
+        aria-label="Удалить тег"
+        onclick={onRemove}
+      >
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M9 3L3 9M3 3L9 9"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    )}
+  </a>
+) : (
+  <span class:list={['tag', `tag-${size}`, `tag-${variant}`, className]} aria-label={ariaLabel}>
+    <span>
+      <slot />
+    </span>
+    {removable && (
+      <button
+        type="button"
+        class="tag-remove"
+        aria-label="Удалить тег"
+        onclick={onRemove}
+      >
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M9 3L3 9M3 3L9 9"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    )}
+  </span>
+)}

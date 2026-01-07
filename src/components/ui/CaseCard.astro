@@ -1,0 +1,301 @@
+---
+/**
+ * Case Card Component
+ * Карточка кейса для Cases Grid
+ * Использует дизайн-токены и компоненты из дизайн-системы
+ * 
+ * Требования:
+ * - Padding: var(spacing.24)
+ * - Background: var(Tokens.Background.bg-surface)
+ * - Stroke: var(Tokens.Border.border-ui)
+ * - Radius: var(spacing.Radius.lg)
+ * - Image (Fill Container)
+ * - Title (Heading/S)
+ * - Tags (компонент Tag)
+ */
+
+import Tag from '@/components/ui/Tag.astro';
+import { Image, type ImageMetadata } from 'astro:assets';
+import type { Lang } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description?: string;
+  image?: ImageMetadata | string;
+  tags?: string[];
+  href?: string;
+  featured?: boolean;
+  role?: string; // Роль в проекте
+  keyResults?: string[]; // Ключевые результаты
+}
+
+const {
+  lang,
+  title,
+  description,
+  image,
+  tags = [],
+  href,
+  featured = false,
+  role,
+  keyResults = [],
+} = Astro.props;
+---
+
+<style>
+  .case-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-24); /* Padding: var(spacing.24) */
+    background-color: var(--bg-surface); /* var(Tokens.Background.bg-surface) */
+    border: 1px solid var(--border-ui); /* var(Tokens.Border.border-ui) */
+    border-radius: var(--spacing-radius-lg); /* var(spacing.Radius.lg) */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+    position: relative;
+  }
+
+  .case-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .case-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-16);
+    height: 100%;
+  }
+
+  .case-card-image-wrapper {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--spacing-radius-md);
+    background-color: var(--color-neutral-100);
+    position: relative;
+  }
+
+  .case-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Fill Container */
+  }
+
+  .case-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-12);
+    flex: 1;
+  }
+
+  /* Title: Heading/S */
+  .case-card-title {
+    font-size: 24px;
+    font-weight: 600; /* SemiBold для Heading/S */
+    line-height: 1.3; /* 130% для Heading/S */
+    letter-spacing: 0;
+    color: var(--text-primary);
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .case-card-role {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4; /* 140% для Body/Small */
+    color: var(--text-secondary);
+    margin: var(--spacing-8) 0 0 0;
+  }
+
+  .case-card-role-label {
+    color: var(--text-secondary);
+  }
+
+  .case-card-key-results {
+    margin-top: var(--spacing-16);
+  }
+
+  .case-card-key-results-title {
+    font-size: 14px;
+    font-weight: 500; /* Medium для UI/Label */
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-8) 0;
+  }
+
+  .case-card-key-results-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-8);
+  }
+
+  .case-card-key-result {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--text-primary);
+  }
+
+  .case-card-key-result-highlight {
+    color: var(--text-brand); /* Brand 400 для выделения процентов */
+  }
+
+  .case-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-8);
+    margin-top: auto;
+  }
+
+  .case-card-featured {
+    position: absolute;
+    top: var(--spacing-24);
+    right: var(--spacing-24);
+    background-color: var(--color-brand-500);
+    color: var(--text-on-action);
+    padding: var(--spacing-4) var(--spacing-12);
+    border-radius: var(--spacing-radius-full);
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 2;
+  }
+</style>
+
+{href ? (
+  <a href={href} class="case-card" data-astro-prefetch>
+    {featured && (
+      <span class="case-card-featured">Рекомендуемый</span>
+    )}
+    {image && (
+      <div class="case-card-image-wrapper">
+        {typeof image === 'string' ? (
+          <img
+            src={image}
+            alt={title}
+            class="case-card-image"
+            loading="lazy"
+          />
+        ) : (
+          <Image
+            src={image}
+            alt={title}
+            width={400}
+            height={225}
+            class="case-card-image"
+            loading="lazy"
+          />
+        )}
+      </div>
+    )}
+    <div class="case-card-content">
+      <h3 class="case-card-title">{title}</h3>
+      {role && (
+        <p class="case-card-role">
+          <span class="case-card-role-label">Роль </span>
+          {role}
+        </p>
+      )}
+      {keyResults.length > 0 && (
+        <div class="case-card-key-results">
+          <p class="case-card-key-results-title">Ключевые результаты</p>
+          <ul class="case-card-key-results-list">
+            {keyResults.map((result) => {
+              // Выделяем проценты (например, "22%", "35%") синим цветом
+              const parts = result.split(/(\d+%)/g);
+              return (
+                <li class="case-card-key-result">
+                  {parts.map((part, index) => (
+                    part.match(/\d+%/) ? (
+                      <span class="case-card-key-result-highlight">{part}</span>
+                    ) : (
+                      <span>{part}</span>
+                    )
+                  ))}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {tags.length > 0 && (
+        <div class="case-card-tags">
+          {tags.map((tag) => (
+            <Tag variant="outline" size="sm">{tag}</Tag>
+          ))}
+        </div>
+      )}
+    </div>
+  </a>
+) : (
+  <div class="case-card">
+    {featured && (
+      <span class="case-card-featured">Рекомендуемый</span>
+    )}
+    {image && (
+      <div class="case-card-image-wrapper">
+        {typeof image === 'string' ? (
+          <img
+            src={image}
+            alt={title}
+            class="case-card-image"
+            loading="lazy"
+          />
+        ) : (
+          <Image
+            src={image}
+            alt={title}
+            width={400}
+            height={225}
+            class="case-card-image"
+            loading="lazy"
+          />
+        )}
+      </div>
+    )}
+    <div class="case-card-content">
+      <h3 class="case-card-title">{title}</h3>
+      {role && (
+        <p class="case-card-role">
+          <span class="case-card-role-label">Роль </span>
+          {role}
+        </p>
+      )}
+      {keyResults.length > 0 && (
+        <div class="case-card-key-results">
+          <p class="case-card-key-results-title">Ключевые результаты</p>
+          <ul class="case-card-key-results-list">
+            {keyResults.map((result) => {
+              // Выделяем проценты (например, "22%", "35%") синим цветом
+              const parts = result.split(/(\d+%)/g);
+              return (
+                <li class="case-card-key-result">
+                  {parts.map((part, index) => (
+                    part.match(/\d+%/) ? (
+                      <span class="case-card-key-result-highlight">{part}</span>
+                    ) : (
+                      <span>{part}</span>
+                    )
+                  ))}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {tags.length > 0 && (
+        <div class="case-card-tags">
+          {tags.map((tag) => (
+            <Tag variant="outline" size="sm">{tag}</Tag>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}

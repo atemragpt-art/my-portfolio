@@ -1,0 +1,13 @@
+# UI Images
+
+UI элементы, иконки, декоративные изображения.
+
+## Использование
+
+```astro
+---
+import icon from '@/assets/images/ui/icon.svg';
+---
+
+<Image src={icon} alt="Icon" width={24} height={24} />
+```

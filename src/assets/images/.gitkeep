@@ -1,0 +1,20 @@
+# Images Directory
+
+Все изображения проекта должны находиться в этой папке.
+
+## Структура (рекомендуется)
+
+- `hero/` - изображения для Hero секций
+- `ui/` - UI элементы, иконки
+- `content/` - изображения для контента (блог, кейсы)
+- `logos/` - логотипы
+
+## Использование
+
+```astro
+---
+import heroImage from '@/assets/images/hero/hero-bg.jpg';
+---
+
+<Image src={heroImage} alt="..." width={1920} height={800} />
+```

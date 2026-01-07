@@ -1,8 +1,16 @@
 ---
+/**
+ * Header Component
+ * Воссоздан на основе Figma дизайна с использованием дизайн-токенов
+ * Соответствует правилам Astro 5.x и дизайн-системе
+ */
+
 import Navigation from './Navigation.astro';
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher.astro';
 import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import Button from '@/components/ui/Button.astro';
 import { getLocalizedPath, type Lang } from '@/i18n/utils';
+import { Spacing, Tokens } from '@/config/tokens';
 
 interface Props {
   lang: Lang;
@@ -12,71 +20,580 @@ const { lang } = Astro.props;
 
 // Локализованная ссылка на главную
 const homeHref = getLocalizedPath('/', lang);
+const contactHref = getLocalizedPath('/contact/', lang);
 ---
 
-<header class="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-  <div class="container mx-auto px-4">
-    <div class="flex items-center justify-between h-16">
-      {/* Logo */}
-      <a 
-        href={homeHref} 
-        class="text-2xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors" 
-        data-astro-prefetch
-      >
-        Logo
-      </a>
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 101; /* Выше overlay меню, чтобы оставаться видимым */
+    width: 100%;
+    min-height: 100px;
+    background-color: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+  }
 
-      {/* Desktop Navigation + Language Switcher + Theme Toggle */}
-      <div class="hidden md:flex items-center gap-6">
-        <nav class="flex items-center space-x-6">
-          <Navigation lang={lang} />
-        </nav>
-        <ThemeToggle />
-        <LanguageSwitcher />
-      </div>
+  .header-container {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-16);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100px;
+    gap: var(--spacing-24);
+  }
 
-      {/* Mobile Menu Button */}
-      <div class="flex items-center gap-2 md:hidden">
-        <ThemeToggle />
-        <LanguageSwitcher />
-        <button
-          id="mobile-menu-button"
-          class="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-          aria-label="Toggle menu"
-          aria-expanded="false"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-    </div>
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-16);
+    flex: 0 0 auto;
+  }
 
-    {/* Mobile Navigation */}
-    <nav id="mobile-menu" class="hidden md:hidden pb-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-      <Navigation lang={lang} mobile />
-    </nav>
-  </div>
-</header>
+  .header-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+  }
 
-<script>
-  // Mobile menu toggle с поддержкой View Transitions
-  function setupMobileMenu() {
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-16);
+    flex: 0 0 auto;
+  }
 
-    if (mobileMenuButton && mobileMenu) {
-      mobileMenuButton.addEventListener('click', () => {
-        const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
-        mobileMenuButton.setAttribute('aria-expanded', String(!isExpanded));
-        mobileMenu.classList.toggle('hidden');
-      });
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: var(--spacing-radius-md);
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 29px;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .logo:hover {
+    opacity: 0.8;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-8);
+    width: auto;
+    min-width: 114px;
+    height: 45px;
+    padding: 0 var(--spacing-16);
+    border: none;
+    background-color: var(--text-primary);
+    border-radius: var(--spacing-radius-md);
+    color: var(--bg-page);
+    font-size: 16px;
+    font-weight: 350;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+
+  .mobile-menu-button:hover {
+    opacity: 0.9;
+  }
+
+  .mobile-menu-button:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  .mobile-menu-icon {
+    width: 27px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-16);
+  }
+
+  /* Затемнение фона при открытом меню */
+  .mobile-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99; /* Ниже overlay и header */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+  }
+
+  .mobile-menu-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Боковая панель меню (не на весь экран) */
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    max-width: 400px;
+    background-color: var(--bg-page);
+    z-index: 100; /* Ниже header (101), но выше остального контента */
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width 0.3s ease;
+    pointer-events: none; /* Отключаем pointer events когда закрыто */
+  }
+
+  .mobile-menu-overlay.open {
+    width: 100%;
+    max-width: 400px;
+    pointer-events: auto; /* Включаем pointer events когда открыто */
+  }
+
+  .mobile-menu {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-64) var(--spacing-24) var(--spacing-24);
+  }
+
+  .mobile-menu-close {
+    position: absolute;
+    top: var(--spacing-24);
+    left: var(--spacing-24);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--spacing-radius-md);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    z-index: 1;
+  }
+
+  .mobile-menu-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .mobile-menu-close:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  .mobile-menu-close-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+  }
+
+  .mobile-menu-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-32);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-top: var(--spacing-64);
+    width: 100%;
+  }
+
+  .mobile-menu-item {
+    width: 100%;
+  }
+
+  .mobile-menu-link {
+    display: block;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-primary); /* Белый текст на темном фоне */
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    padding: var(--spacing-8) 0;
+  }
+
+  .mobile-menu-link:hover {
+    opacity: 0.8;
+    color: var(--text-brand); /* Brand 400 при hover */
+  }
+
+  .mobile-menu-link:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-24);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    font-weight: 350;
+    line-height: 1.5;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover {
+    opacity: 0.8;
+  }
+
+  .nav-link:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-12);
+  }
+
+  .header-contact-button {
+    background-color: var(--text-primary) !important;
+    color: var(--bg-page) !important;
+    border: none !important;
+  }
+
+  .header-contact-button:hover {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .desktop-nav {
+      display: none;
+    }
+
+    .header-right {
+      gap: var(--spacing-8);
     }
   }
 
-  // Запускаем при загрузке и после View Transitions
-  // astro:after-swap - для быстрой синхронной инициализации (без флеша)
-  // astro:page-load - для надёжности (если after-swap не сработал)
+  /* Предотвращение скролла body при открытом меню */
+  body.menu-open {
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .header-container {
+      padding: 0 var(--spacing-12);
+      min-height: 80px;
+    }
+
+    .header {
+      min-height: 80px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      font-size: 24px;
+    }
+
+    .mobile-menu-button {
+      width: 40px;
+      height: 40px;
+    }
+  }
+</style>
+
+<header class="header" role="banner">
+  <div class="header-container">
+    <!-- Левая часть: Меню + Навигация -->
+    <div class="header-left">
+      <!-- Кнопка меню -->
+      <button
+        id="mobile-menu-button"
+        class="mobile-menu-button"
+        aria-label="Открыть меню"
+        aria-expanded="false"
+        aria-controls="mobile-menu-overlay"
+      >
+        <svg
+          class="mobile-menu-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          {/* Иконка: черный круг с пунктирным кругом */}
+          <circle cx="12" cy="12" r="7" fill="currentColor" />
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-dasharray="2 2"
+            opacity="0.5"
+          />
+        </svg>
+        <span>Меню</span>
+      </button>
+
+      <!-- Десктопная навигация (левая часть) -->
+      <nav class="desktop-nav" aria-label="Основная навигация">
+        <ul class="nav-links">
+          <li>
+            <a href={getLocalizedPath('/cases/', lang)} class="nav-link" data-astro-prefetch>
+              Кейсы
+            </a>
+          </li>
+          <li>
+            <a href={getLocalizedPath('/solutions/', lang)} class="nav-link" data-astro-prefetch>
+              Услуги
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Центр: Логотип -->
+    <div class="header-center">
+      <a href={homeHref} class="logo" data-astro-prefetch aria-label="На главную">
+        Рс
+      </a>
+    </div>
+
+    <!-- Правая часть: Навигация + Язык + Тема + Кнопка -->
+    <div class="header-right">
+      <!-- Десктопная навигация (правая часть) -->
+      <nav class="desktop-nav" aria-label="Дополнительная навигация">
+        <ul class="nav-links">
+          <li>
+            <a href={getLocalizedPath('/about/', lang)} class="nav-link" data-astro-prefetch>
+              Обо мне
+            </a>
+          </li>
+          <li>
+            <a href={getLocalizedPath('/blog/', lang)} class="nav-link" data-astro-prefetch>
+              Блог
+            </a>
+          </li>
+          <li>
+            <a href={getLocalizedPath('/faq/', lang)} class="nav-link" data-astro-prefetch>
+              FAQ
+            </a>
+          </li>
+          <li>
+            <a href={contactHref} class="nav-link" data-astro-prefetch>
+              Контакты
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Действия: Язык, Тема, Кнопка -->
+      <div class="header-actions">
+        <LanguageSwitcher />
+        <ThemeToggle />
+        <Button href={contactHref} variant="primary" size="md" class="header-contact-button desktop-nav">
+          Связаться
+        </Button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Затемнение фона при открытом меню -->
+<div id="mobile-menu-backdrop" class="mobile-menu-backdrop" aria-hidden="true"></div>
+
+<!-- Боковая панель меню (вне header для правильного z-index) -->
+<div id="mobile-menu-overlay" class="mobile-menu-overlay" aria-hidden="true">
+  <nav class="mobile-menu" aria-label="Мобильная навигация" role="navigation">
+    <!-- Кнопка закрытия (крестик) -->
+    <button
+      id="mobile-menu-close"
+      class="mobile-menu-close"
+      aria-label="Закрыть меню"
+      type="button"
+    >
+      <svg
+        class="mobile-menu-close-icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+
+      <!-- Список пунктов меню -->
+      <ul class="mobile-menu-list">
+        <li class="mobile-menu-item">
+          <a
+            href={getLocalizedPath('/cases/', lang)}
+            class="mobile-menu-link"
+            data-astro-prefetch
+          >
+            Кейсы
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a
+            href={getLocalizedPath('/solutions/', lang)}
+            class="mobile-menu-link"
+            data-astro-prefetch
+          >
+            Услуги
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a
+            href={getLocalizedPath('/about/', lang)}
+            class="mobile-menu-link"
+            data-astro-prefetch
+          >
+            Обо мне
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a
+            href={getLocalizedPath('/blog/', lang)}
+            class="mobile-menu-link"
+            data-astro-prefetch
+          >
+            Блог
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a
+            href={getLocalizedPath('/faq/', lang)}
+            class="mobile-menu-link"
+            data-astro-prefetch
+          >
+            FAQ
+          </a>
+        </li>
+        <li class="mobile-menu-item">
+          <a
+            href={contactHref}
+            class="mobile-menu-link"
+            data-astro-prefetch
+          >
+            Контакты
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<script>
+  /**
+   * Боковая панель меню
+   * Использует astro:after-swap для поддержки View Transitions
+   */
+  function setupMobileMenu() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+    const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+    const mobileMenuClose = document.getElementById('mobile-menu-close');
+    const body = document.body;
+
+    if (!mobileMenuButton || !mobileMenuOverlay || !mobileMenuBackdrop || !mobileMenuClose) return;
+
+    const openMenu = () => {
+      mobileMenuButton.setAttribute('aria-expanded', 'true');
+      mobileMenuOverlay.setAttribute('aria-hidden', 'false');
+      mobileMenuBackdrop.setAttribute('aria-hidden', 'false');
+      mobileMenuOverlay.classList.add('open');
+      mobileMenuBackdrop.classList.add('open');
+      body.classList.add('menu-open');
+    };
+
+    const closeMenu = () => {
+      mobileMenuButton.setAttribute('aria-expanded', 'false');
+      mobileMenuOverlay.setAttribute('aria-hidden', 'true');
+      mobileMenuBackdrop.setAttribute('aria-hidden', 'true');
+      mobileMenuOverlay.classList.remove('open');
+      mobileMenuBackdrop.classList.remove('open');
+      body.classList.remove('menu-open');
+    };
+
+    const toggleMenu = () => {
+      const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+      if (isExpanded) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    };
+
+    // Открытие меню по кнопке
+    mobileMenuButton.addEventListener('click', toggleMenu);
+
+    // Закрытие меню по кнопке закрытия (крестик)
+    mobileMenuClose.addEventListener('click', closeMenu);
+
+    // Закрытие меню при клике на backdrop (затемнение)
+    mobileMenuBackdrop.addEventListener('click', closeMenu);
+
+    // Закрытие меню при клике на ссылку (для View Transitions)
+    const menuLinks = mobileMenuOverlay.querySelectorAll('.mobile-menu-link');
+    menuLinks.forEach((link) => {
+      link.addEventListener('click', () => {
+        closeMenu();
+      });
+    });
+
+    // Закрытие меню по Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mobileMenuOverlay.classList.contains('open')) {
+        closeMenu();
+      }
+    });
+  }
+
+  // Инициализация при загрузке и после View Transitions
   setupMobileMenu();
   document.addEventListener('astro:after-swap', setupMobileMenu);
   window.addEventListener('astro:page-load', setupMobileMenu);

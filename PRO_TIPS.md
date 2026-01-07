@@ -946,4 +946,64 @@ rm -rf cursor-talk-to-figma-mcp/
 
 ---
 
-**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации, управление проектом, предотвращение дублирования event listeners)
+## 🎨 Design Tokens в CSS
+
+### JavaScript переменные в CSS блоках
+
+**❌ Ошибка (не работает в Astro):**
+```astro
+---
+import { Spacing } from '@/config/tokens';
+---
+
+<style>
+  .container {
+    padding: ${Spacing[16]}px;  /* ❌ Ошибка: Unknown word Spacing */
+    border-radius: ${Spacing['radius-md']}px;  /* ❌ Ошибка */
+  }
+</style>
+```
+
+**✅ Правильно (используй CSS переменные):**
+```astro
+<style>
+  .container {
+    padding: var(--spacing-16);  /* ✅ CSS переменная из global.css */
+    border-radius: var(--spacing-radius-md);  /* ✅ CSS переменная */
+  }
+</style>
+```
+
+**Как это работает:**
+1. В `src/config/tokens.ts` определена функция `generateCSSVariables()`, которая генерирует CSS переменные из токенов
+2. В `src/styles/global.css` эти переменные добавляются в `:root` через `generateCSSVariables()`
+3. Все CSS переменные доступны глобально во всех компонентах без дополнительных импортов
+
+**Пример генерации CSS переменных:**
+```typescript
+// src/config/tokens.ts
+export const Spacing = {
+  16: 16,
+  'radius-md': 8,
+} as const;
+
+export function generateCSSVariables(): string {
+  return `
+    --spacing-16: ${Spacing[16]}px;
+    --spacing-radius-md: ${Spacing['radius-md']}px;
+  `;
+}
+```
+
+```css
+/* src/styles/global.css */
+:root {
+  ${generateCSSVariables()}
+}
+```
+
+**Pro-Tip:** В Astro нельзя использовать JavaScript переменные (например, `${Spacing[16]}`) напрямую в CSS блоках. Нужно использовать CSS переменные (`var(--spacing-16)`), которые генерируются из токенов и доступны глобально. CSS переменные из `tokens.ts` автоматически генерируются в `global.css` через функцию `generateCSSVariables()`, поэтому они доступны во всех компонентах без дополнительных импортов.
+
+---
+
+**Последнее обновление:** 2026-01-06 (добавлены Pro-Tips: Promise.allSettled проверка, i18n синхронизация конфигурации, управление проектом, предотвращение дублирования event listeners, Design Tokens в CSS)

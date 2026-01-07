@@ -1,0 +1,13 @@
+# Hero Images
+
+Изображения для Hero секций (фоновые изображения, баннеры).
+
+## Использование
+
+```astro
+---
+import heroImage from '@/assets/images/hero/hero-bg.jpg';
+---
+
+<Hero backgroundImage={heroImage} />
+```

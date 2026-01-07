@@ -1,23 +1,24 @@
 ---
-// src/components/ui/HeroImage.astro
-// Компонент для отображения hero-изображений с оптимизацией через astro:assets
-// 
-// Использование:
-// 1. Для изображений из src/assets/ - импортируй и передавай напрямую:
-//    import heroImg from '@/assets/images/hero.jpg';
-//    <HeroImage src={heroImg} alt="..." />
-//
-// 2. Для remote images - используй URL строку (требует настройки image.remotePatterns):
-//    <HeroImage src="https://example.com/image.jpg" alt="..." />
-//    Компонент <Image /> автоматически оптимизирует remote images, если они настроены в remotePatterns
-//
-// 3. Для изображений из Content Collections - используй путь из frontmatter:
-//    <HeroImage src={post.data.heroImage} alt={post.data.title} />
+/**
+ * HeroImage Component
+ * Компонент для отображения hero-изображений с оптимизацией через astro:assets
+ * 
+ * ВАЖНО: Все изображения должны находиться в src/assets/images/
+ * 
+ * Использование:
+ * 1. Локальные изображения (рекомендуется):
+ *    import heroImg from '@/assets/images/hero/hero-bg.jpg';
+ *    <HeroImage src={heroImg} alt="..." />
+ *
+ * 2. Для Content Collections - используй путь из frontmatter:
+ *    <HeroImage src={post.data.heroImage} alt={post.data.title} />
+ */
 
 import { Image, type ImageMetadata } from 'astro:assets';
 
 interface Props {
-  src?: string | ImageMetadata;
+  /** Локальное изображение из src/assets/images/ (ImageMetadata) */
+  src?: ImageMetadata;
   alt: string;
   width?: number;
   height?: number;
@@ -37,9 +38,8 @@ if (!src) {
   return null;
 }
 
-// Компонент <Image /> из astro:assets поддерживает как ImageMetadata (локальные),
-// так и string URLs (remote images), если они настроены в image.remotePatterns
-// Astro автоматически определит тип и обработает изображение соответственно
+// Компонент <Image /> из astro:assets оптимизирует локальные изображения
+// Все изображения должны находиться в src/assets/images/
 ---
 {src && (
   <div class={`mb-6 ${className}`}>

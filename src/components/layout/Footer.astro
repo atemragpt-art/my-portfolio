@@ -1,4 +1,10 @@
 ---
+/**
+ * Footer Component
+ * Подвал сайта согласно дизайн-системе
+ * Использует дизайн-токены и компоненты из дизайн-системы
+ */
+
 import { useTranslations, getLocalizedPath, type Lang } from '@/i18n/utils';
 
 interface Props {
@@ -30,22 +36,107 @@ const footerLinks = {
 };
 ---
 
-<footer class="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-  <div class="container mx-auto px-4 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+<style>
+  .footer {
+    width: 100%;
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border-ui);
+    padding: var(--spacing-64) var(--spacing-64);
+  }
+
+  .footer-container {
+    max-width: 1312px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-32);
+    margin-bottom: var(--spacing-48);
+  }
+
+  .footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-16);
+  }
+
+  .footer-column-title {
+    font-size: 16px;
+    font-weight: 600; /* SemiBold */
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-12);
+  }
+
+  .footer-link {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .footer-link:hover {
+    color: var(--text-brand);
+  }
+
+  .footer-copyright {
+    padding-top: var(--spacing-32);
+    border-top: 1px solid var(--border-ui);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--text-secondary);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .footer {
+      padding: var(--spacing-48) var(--spacing-32);
+    }
+
+    .footer-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-24);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .footer {
+      padding: var(--spacing-48) var(--spacing-16);
+    }
+
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: var(--spacing-24);
+    }
+  }
+</style>
+
+<footer class="footer" role="contentinfo" aria-label="Footer">
+  <div class="footer-container">
+    <div class="footer-grid">
       {/* Компания */}
-      <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-          {t('footer.company')}
-        </h3>
-        <ul class="space-y-2">
+      <div class="footer-column">
+        <h3 class="footer-column-title">{t('footer.company')}</h3>
+        <ul class="footer-links">
           {footerLinks.company.map((link) => (
             <li>
-              <a
-                href={link.href}
-                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                data-astro-prefetch
-              >
+              <a href={link.href} class="footer-link" data-astro-prefetch>
                 {link.label}
               </a>
             </li>
@@ -54,18 +145,12 @@ const footerLinks = {
       </div>
 
       {/* Ресурсы */}
-      <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-          {t('footer.resources')}
-        </h3>
-        <ul class="space-y-2">
+      <div class="footer-column">
+        <h3 class="footer-column-title">{t('footer.resources')}</h3>
+        <ul class="footer-links">
           {footerLinks.resources.map((link) => (
             <li>
-              <a
-                href={link.href}
-                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                data-astro-prefetch
-              >
+              <a href={link.href} class="footer-link" data-astro-prefetch>
                 {link.label}
               </a>
             </li>
@@ -74,18 +159,12 @@ const footerLinks = {
       </div>
 
       {/* Правовая информация */}
-      <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-          {t('footer.legal')}
-        </h3>
-        <ul class="space-y-2">
+      <div class="footer-column">
+        <h3 class="footer-column-title">{t('footer.legal')}</h3>
+        <ul class="footer-links">
           {footerLinks.legal.map((link) => (
             <li>
-              <a
-                href={link.href}
-                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                data-astro-prefetch
-              >
+              <a href={link.href} class="footer-link" data-astro-prefetch>
                 {link.label}
               </a>
             </li>
@@ -94,18 +173,12 @@ const footerLinks = {
       </div>
 
       {/* Контакты */}
-      <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-          {t('footer.contacts')}
-        </h3>
-        <ul class="space-y-2">
+      <div class="footer-column">
+        <h3 class="footer-column-title">{t('footer.contacts')}</h3>
+        <ul class="footer-links">
           {footerLinks.contact.map((link) => (
             <li>
-              <a
-                href={link.href}
-                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                data-astro-prefetch
-              >
+              <a href={link.href} class="footer-link" data-astro-prefetch>
                 {link.label}
               </a>
             </li>
@@ -115,7 +188,7 @@ const footerLinks = {
     </div>
 
     {/* Copyright */}
-    <div class="pt-8 border-t border-gray-200 dark:border-gray-800 text-center text-gray-600 dark:text-gray-400">
+    <div class="footer-copyright">
       <p>{t('footer.copyright', { year: currentYear })}</p>
     </div>
   </div>

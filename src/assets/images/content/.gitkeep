@@ -1,0 +1,13 @@
+# Content Images
+
+Изображения для контента: блог, кейсы, статьи.
+
+## Использование
+
+```astro
+---
+import postImage from '@/assets/images/content/post-hero.jpg';
+---
+
+<Image src={postImage} alt="Post image" width={800} height={400} />
+```

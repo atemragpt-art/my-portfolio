@@ -1,0 +1,337 @@
+---
+/**
+ * Cases Grid Section
+ * Отображает сетку карточек кейсов
+ * Использует дизайн-токены и компоненты из дизайн-системы
+ */
+
+import CaseCard from '@/components/ui/CaseCard.astro';
+import Button from '@/components/ui/Button.astro';
+import { getCollection } from 'astro:content';
+import { filterByLang, getIdSlug } from '@/utils/content';
+import { sortByFeatured } from '@/utils/sorting';
+import type { Lang } from '@/i18n/utils';
+import { getLocalizedPath } from '@/i18n/utils';
+import { Image, type ImageMetadata } from 'astro:assets';
+
+// Импортируем изображения для кейсов
+import case1Image from '@/assets/images/cases/case-1.jpg';
+import case2Image from '@/assets/images/cases/case-2.jpg';
+import case3Image from '@/assets/images/cases/case-3.jpg';
+
+// Маппинг путей к импортированным изображениям
+const imageMap: Record<string, ImageMetadata> = {
+  '@/assets/images/cases/case-1.jpg': case1Image,
+  '@/assets/images/cases/case-2.jpg': case2Image,
+  '@/assets/images/cases/case-3.jpg': case3Image,
+};
+
+interface Props {
+  lang: Lang;
+  /** Максимальное количество кейсов для отображения (по умолчанию 3) */
+  limit?: number;
+}
+
+const { lang, limit = 3 } = Astro.props;
+
+// Получаем кейсы из Content Collections
+let cases = [];
+try {
+  const allCases = await getCollection('cases');
+  const filteredCases = filterByLang(allCases, lang);
+  const sortedCases = sortByFeatured(filteredCases);
+  cases = sortedCases.slice(0, limit);
+} catch (error) {
+  console.error('Error loading cases:', error);
+  cases = [];
+}
+
+// Если кейсов нет, создаем моковые данные для демонстрации
+if (cases.length === 0) {
+  cases = [
+    {
+      id: 'case-1-optimization',
+      data: {
+        title: 'ОПТИМИЗАЦИЯ ПРОЦЕССОВ ЧПУ',
+        description: 'Оптимизация производственных процессов с использованием передовых технологий',
+        technologies: ['Аэрокосмическая отрасль', 'Оптимизация процессов'],
+        featured: true,
+        role: 'Ведущий консультант по оптимизации',
+        keyResults: [
+          'Экономия затрат на 22%',
+          'Сокращение времени цикла на 35%',
+          'Повышение стабильности качества деталей',
+        ],
+        heroImage: case1Image,
+      },
+    },
+    {
+      id: 'case-2-efficiency',
+      data: {
+        title: 'СРАВНЕНИЕ ЦИКЛОВ ПРОИЗВОДСТВА',
+        description: 'Анализ и оптимизация производственных циклов для повышения эффективности',
+        technologies: ['Машиностроение', 'Анализ данных'],
+        featured: false,
+        role: 'Специалист по оптимизации производства',
+        keyResults: [
+          'Сокращение цикла на 30%',
+          'Улучшение качества продукции',
+          'Снижение брака на 15%',
+        ],
+        heroImage: case2Image,
+      },
+    },
+    {
+      id: 'case-3-quality',
+      data: {
+        title: 'КОНТРОЛЬ КАЧЕСТВА И СНИЖЕНИЕ БРАКА',
+        description: 'Внедрение системы контроля качества для снижения брака продукции',
+        technologies: ['Металлообработка', 'Контроль качества'],
+        featured: false,
+        role: 'Инженер по контролю качества',
+        keyResults: [
+          'Снижение брака с 15% до 0.5%',
+          'Повышение точности измерений',
+          'Улучшение стабильности производства',
+        ],
+        heroImage: case3Image,
+      },
+    },
+  ].slice(0, limit);
+}
+
+const allCasesHref = getLocalizedPath('/cases/', lang);
+---
+
+<style>
+  .cases-grid {
+    width: 100%;
+    padding: var(--spacing-80) var(--spacing-64);
+    background-color: var(--bg-page);
+  }
+
+  .cases-grid-wrapper {
+    max-width: 1312px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Header Section */
+  .cases-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-48);
+    gap: var(--spacing-32);
+  }
+
+  .cases-grid-header-content {
+    flex: 1;
+  }
+
+  /* Title: Heading/XL */
+  .cases-grid-title {
+    font-size: 64px;
+    font-weight: 600; /* SemiBold для Heading/XL */
+    line-height: 1.1; /* 110% для Heading/XL */
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-16) 0;
+    text-transform: uppercase;
+  }
+
+  /* Description: Body/Large */
+  .cases-grid-description {
+    font-size: 18px;
+    font-weight: 400; /* Regular для Body/Large */
+    line-height: 1.5; /* 150% для Body/Large */
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 600px;
+  }
+
+  .cases-grid-navigation {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-16);
+    flex-shrink: 0;
+  }
+
+  .cases-grid-nav-button {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-ui);
+    border-radius: var(--spacing-radius-md);
+    background-color: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    padding: 0;
+  }
+
+  .cases-grid-nav-button:hover {
+    background-color: var(--color-neutral-100);
+    border-color: var(--color-neutral-400);
+  }
+
+  .cases-grid-nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .cases-grid-nav-button svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+  }
+
+  /* Grid Container */
+  .cases-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Фиксированно 3 колонки */
+    gap: var(--spacing-24); /* Gap: var(spacing.24) */
+    width: 100%;
+  }
+
+  .cases-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 16px;
+    padding: var(--spacing-48);
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .cases-grid {
+      padding: var(--spacing-64) var(--spacing-32);
+    }
+
+    .cases-grid-header {
+      flex-direction: column;
+      margin-bottom: var(--spacing-32);
+    }
+
+    .cases-grid-title {
+      font-size: 48px; /* Heading/L для tablet */
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .cases-grid-description {
+      font-size: 16px; /* Body/Base для tablet */
+    }
+
+    .cases-grid-container {
+      grid-template-columns: repeat(2, 1fr); /* 2 колонки на tablet */
+      gap: var(--spacing-16);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cases-grid {
+      padding: var(--spacing-48) var(--spacing-16);
+    }
+
+    .cases-grid-title {
+      font-size: 32px; /* Heading/M для mobile */
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .cases-grid-description {
+      font-size: 14px; /* Body/Small для mobile */
+      line-height: 1.4;
+    }
+
+    .cases-grid-container {
+      grid-template-columns: 1fr; /* 1 колонка на mobile */
+      gap: var(--spacing-16);
+    }
+
+    .cases-grid-navigation {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>
+
+<section class="cases-grid" aria-label="Кейсы">
+  <div class="cases-grid-wrapper">
+    {/* Header */}
+    <div class="cases-grid-header">
+      <div class="cases-grid-header-content">
+        <h2 class="cases-grid-title">КЕЙСЫ</h2>
+        <p class="cases-grid-description">
+          Реальные проекты, демонстрирующие измеримые улучшения в эффективности, снижении затрат и производственных возможностях
+        </p>
+      </div>
+      <div class="cases-grid-navigation">
+        <Button href={allCasesHref} variant="outline" size="md">
+          Все кейсы
+        </Button>
+        <button class="cases-grid-nav-button" aria-label="Предыдущий кейс" disabled>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="cases-grid-nav-button" aria-label="Следующий кейс" disabled>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {/* Grid Container */}
+    <div class="cases-grid-container">
+      {cases.length > 0 ? (
+        cases.map((caseItem) => {
+          // Определяем href только если это реальный кейс из Content Collections
+          const caseHref = caseItem.id && caseItem.id.startsWith('case-') 
+            ? getLocalizedPath(`/cases/${getIdSlug(caseItem.id)}`, lang)
+            : undefined;
+          
+          // Преобразуем строковый путь в ImageMetadata
+          let caseImage: ImageMetadata | string | undefined = undefined;
+          if (caseItem.data.heroImage) {
+            // Если это строка с путем, пытаемся найти в imageMap
+            if (typeof caseItem.data.heroImage === 'string') {
+              caseImage = imageMap[caseItem.data.heroImage] || caseItem.data.heroImage;
+            } else {
+              caseImage = caseItem.data.heroImage;
+            }
+          } else {
+            // Если heroImage не указан, используем изображение по ID кейса
+            if (caseItem.id?.includes('case-1') || caseItem.id?.includes('optimization')) {
+              caseImage = case1Image;
+            } else if (caseItem.id?.includes('case-2') || caseItem.id?.includes('efficiency')) {
+              caseImage = case2Image;
+            } else if (caseItem.id?.includes('case-3') || caseItem.id?.includes('quality')) {
+              caseImage = case3Image;
+            }
+          }
+          
+          return (
+            <CaseCard
+              lang={lang}
+              title={caseItem.data.title}
+              description={caseItem.data.description}
+              image={caseImage}
+              tags={caseItem.data.technologies || []}
+              href={caseHref}
+              featured={caseItem.data.featured}
+              role={caseItem.data.role}
+              keyResults={caseItem.data.keyResults}
+            />
+          );
+        })
+      ) : (
+        <p class="cases-empty">Пока нет опубликованных кейсов.</p>
+      )}
+    </div>
+  </div>
+</section>

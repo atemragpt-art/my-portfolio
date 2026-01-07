@@ -1,0 +1,13 @@
+# Logos
+
+Логотипы компании, партнеров, клиентов.
+
+## Использование
+
+```astro
+---
+import logo from '@/assets/images/logos/company-logo.svg';
+---
+
+<Image src={logo} alt="Company logo" width={200} height={60} />
+```

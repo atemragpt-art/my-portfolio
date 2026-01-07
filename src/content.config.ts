@@ -27,6 +27,8 @@ const cases = defineCollection({
     technologies: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     heroImage: z.string().optional(),
+    role: z.string().optional(), // Роль в проекте
+    keyResults: z.array(z.string()).default([]), // Ключевые результаты
     lang: z.enum(['ru', 'en', 'de', 'es', 'fr', 'pt', 'it', 'tr', 'ar', 'zh']).default('ru'),
   }),
 });

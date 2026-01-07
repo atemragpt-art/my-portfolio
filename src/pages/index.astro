@@ -1,12 +1,15 @@
 ---
 import LayoutMain from '@/layouts/LayoutMain.astro';
-import Section from '@/components/ui/Section.astro';
-import Button from '@/components/ui/Button.astro';
+import Hero from '@/components/sections/Hero.astro';
+import CasesGrid from '@/components/sections/CasesGrid.astro';
 import CooperationModels from '@/components/sections/CooperationModels.astro';
 import { generateOrganizationSchema } from '@/utils/schema';
 import { SITE_CONFIG } from '@/config/site';
+import { getLangFromUrl } from '@/i18n/utils';
 
 interface Props {}
+
+const lang = getLangFromUrl(Astro.url);
 
 const organizationSchema = generateOrganizationSchema({
   name: SITE_CONFIG.name,
@@ -16,17 +19,28 @@ const organizationSchema = generateOrganizationSchema({
     contactType: 'Customer Service',
   },
 });
+
+// Фоновое видео Hero section
+// ВАЖНО: Все медиа-файлы должны находиться в src/assets/images/
+// Видео предпочтительнее GIF: меньше размер, лучше качество, поддержка autoplay/loop
+// В Astro видео из src/assets/ можно импортировать напрямую
+import heroBackgroundVideo from '@/assets/images/hero/video.mp4';
+import heroBackgroundImage from '@/assets/images/hero/hero-bg.jpg'; // Fallback
 ---
 
 <LayoutMain title="Главная" description="Главная страница портфолио">
   <script type="application/ld+json" set:html={organizationSchema} />
-  <Section>
-    <h1 class="text-4xl font-bold mb-4">Добро пожаловать</h1>
-    <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
-      Это главная страница сайта. Здесь будет размещен контент согласно Шаблону 1.
-    </p>
-    <Button href="/about">О компании</Button>
-  </Section>
+  
+  <Hero 
+    lang={lang}
+    backgroundVideo={heroBackgroundVideo}
+    backgroundImage={heroBackgroundImage}
+    title="ЭКСПЕРТНАЯ ПОДДЕРЖКА В МЕТАЛЛООБРАБОТКЕ"
+    description="Получите профессиональное внедрение инструмента и защиту интересов перед заказчиком, привлекая эксперта именно тогда, когда это нужно вашему бизнесу."
+    ctaText="Начать проект"
+  />
+
+  <CasesGrid lang={lang} limit={3} />
 
   <CooperationModels />
 </LayoutMain>

@@ -7,6 +7,66 @@
  */
 
 /* ========================================
+   Design Tokens - CSS Variables
+   ======================================== */
+
+:root {
+  /* Primitives - Brand Colors */
+  --color-brand-300: #7DD3FC;
+  --color-brand-400: #38BDF8;
+  --color-brand-500: #0EA5E9;
+  --color-brand-600: #0284C7;
+
+  /* Primitives - Neutral Colors */
+  --color-neutral-0: #FFFFFF;
+  --color-neutral-50: #F9FAFB;
+  --color-neutral-100: #F3F4F6;
+  --color-neutral-200: #E5E7EB;
+  --color-neutral-400: #9CA3AF;
+  --color-neutral-500: #6B7280;
+  --color-neutral-900: #111827;
+
+  /* Primitives - Status Colors */
+  --color-status-error: #EF4444;
+
+  /* Primitives - Overlay */
+  --color-overlay-scrim: #00000066;
+
+  /* Spacing */
+  --spacing-0: 0px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+  --spacing-radius-md: 8px;
+  --spacing-radius-lg: 12px;
+  --spacing-radius-full: 999px;
+
+  /* Tokens - Background */
+  --bg-page: var(--color-neutral-900);
+  --bg-surface: var(--color-neutral-900);
+
+  /* Tokens - Action */
+  --bg-primary: var(--color-brand-500);
+  --bg-primary-hover: var(--color-brand-600);
+
+  /* Tokens - Text */
+  --text-primary: var(--color-neutral-0);
+  --text-secondary: var(--color-neutral-400);
+  --text-brand: var(--color-brand-400);
+  --text-on-action: var(--color-neutral-0);
+
+  /* Tokens - Border */
+  --border-ui: var(--color-neutral-200);
+  --border-error: var(--color-status-error);
+}
+
+/* ========================================
    Base Typography - Multi-language Support
    ======================================== */
 
@@ -34,8 +94,8 @@ html {
 
 body {
   line-height: 1.6;
-  background-color: #ffffff;
-  color: #111827;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -44,8 +104,8 @@ body {
    ======================================== */
 
 .dark body {
-  background-color: #111827;
-  color: #f9fafb;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
 }
 
 /* ========================================
@@ -102,7 +162,7 @@ html[dir="rtl"] .text-right {
    ======================================== */
 
 :focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
 }
 
@@ -116,13 +176,13 @@ html[dir="rtl"] .text-right {
    ======================================== */
 
 ::selection {
-  background-color: #3b82f6;
-  color: #ffffff;
+  background-color: var(--color-brand-500);
+  color: var(--text-primary);
 }
 
 .dark ::selection {
-  background-color: #60a5fa;
-  color: #111827;
+  background-color: var(--color-brand-400);
+  color: var(--color-neutral-900);
 }
 
 /* ========================================
@@ -136,28 +196,28 @@ html[dir="rtl"] .text-right {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--color-neutral-100);
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: #1f2937;
+  background: var(--color-neutral-900);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 4px;
+  background-color: var(--color-neutral-400);
+  border-radius: var(--spacing-4);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
+  background-color: var(--color-neutral-500);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+  background-color: var(--color-neutral-500);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280;
+  background-color: var(--color-neutral-400);
 }
 
 /* ========================================
