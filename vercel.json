@@ -1,11 +1,3 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "astro",
-  "build": {
-    "env": {
-      "NODE_VERSION": "22"
-    }
-  }
+  "framework": "astro"
 }
