@@ -35,26 +35,37 @@ interface Props {
 const { lang, limit = 3 } = Astro.props;
 
 // Получаем кейсы из Content Collections
-let cases = [];
+let allCasesList = [];
 try {
   const allCases = await getCollection('cases');
   const filteredCases = filterByLang(allCases, lang);
-  const sortedCases = sortByFeatured(filteredCases);
-  cases = sortedCases.slice(0, limit);
+  // Исключаем старые example-case файлы
+  const validCases = filteredCases.filter((caseItem) => {
+    const id = caseItem.id.toLowerCase();
+    return !id.includes('example-case');
+  });
+  const sortedCases = sortByFeatured(validCases);
+  allCasesList = sortedCases;
+  
+  // Отладка: проверяем, сколько кейсов загружено
+  if (import.meta.env.DEV) {
+    console.log(`[CasesGrid] Total cases: ${allCases.length}, Filtered: ${filteredCases.length}, Valid (no example): ${validCases.length}, Sorted: ${sortedCases.length}`);
+  }
 } catch (error) {
   console.error('Error loading cases:', error);
-  cases = [];
+  allCasesList = [];
 }
 
 // Если кейсов нет, создаем моковые данные для демонстрации
-if (cases.length === 0) {
-  cases = [
+// Также добавляем дополнительные кейсы для демонстрации прокрутки
+if (allCasesList.length === 0) {
+  allCasesList = [
     {
       id: 'case-1-optimization',
       data: {
         title: 'ОПТИМИЗАЦИЯ ПРОЦЕССОВ ЧПУ',
         description: 'Оптимизация производственных процессов с использованием передовых технологий',
-        technologies: ['Аэрокосмическая отрасль', 'Оптимизация процессов'],
+        technologies: ['NX CAM', 'VERICUT', 'Оптимизация процессов'],
         featured: true,
         role: 'Ведущий консультант по оптимизации',
         keyResults: [
@@ -70,7 +81,7 @@ if (cases.length === 0) {
       data: {
         title: 'СРАВНЕНИЕ ЦИКЛОВ ПРОИЗВОДСТВА',
         description: 'Анализ и оптимизация производственных циклов для повышения эффективности',
-        technologies: ['Машиностроение', 'Анализ данных'],
+        technologies: ['Анализ данных', 'Оптимизация', 'Производство'],
         featured: false,
         role: 'Специалист по оптимизации производства',
         keyResults: [
@@ -86,7 +97,7 @@ if (cases.length === 0) {
       data: {
         title: 'КОНТРОЛЬ КАЧЕСТВА И СНИЖЕНИЕ БРАКА',
         description: 'Внедрение системы контроля качества для снижения брака продукции',
-        technologies: ['Металлообработка', 'Контроль качества'],
+        technologies: ['CMM', 'Контроль качества', 'Метрология'],
         featured: false,
         role: 'Инженер по контролю качества',
         keyResults: [
@@ -97,7 +108,125 @@ if (cases.length === 0) {
         heroImage: case3Image,
       },
     },
-  ].slice(0, limit);
+    // Дублируем кейсы для демонстрации прокрутки (копии 1-3)
+    {
+      id: 'case-4-optimization-copy-1',
+      data: {
+        title: 'ОПТИМИЗАЦИЯ ПРОЦЕССОВ ЧПУ',
+        description: 'Оптимизация производственных процессов с использованием передовых технологий',
+        technologies: ['NX CAM', 'VERICUT', 'Оптимизация процессов'],
+        featured: false,
+        role: 'Ведущий консультант по оптимизации',
+        keyResults: [
+          'Экономия затрат на 22%',
+          'Сокращение времени цикла на 35%',
+          'Повышение стабильности качества деталей',
+        ],
+        heroImage: case1Image,
+      },
+    },
+    {
+      id: 'case-5-efficiency-copy-1',
+      data: {
+        title: 'СРАВНЕНИЕ ЦИКЛОВ ПРОИЗВОДСТВА',
+        description: 'Анализ и оптимизация производственных циклов для повышения эффективности',
+        technologies: ['Анализ данных', 'Оптимизация', 'Производство'],
+        featured: false,
+        role: 'Специалист по оптимизации производства',
+        keyResults: [
+          'Сокращение цикла на 30%',
+          'Улучшение качества продукции',
+          'Снижение брака на 15%',
+        ],
+        heroImage: case2Image,
+      },
+    },
+    {
+      id: 'case-6-quality-copy-1',
+      data: {
+        title: 'КОНТРОЛЬ КАЧЕСТВА И СНИЖЕНИЕ БРАКА',
+        description: 'Внедрение системы контроля качества для снижения брака продукции',
+        technologies: ['CMM', 'Контроль качества', 'Метрология'],
+        featured: false,
+        role: 'Инженер по контролю качества',
+        keyResults: [
+          'Снижение брака с 15% до 0.5%',
+          'Повышение точности измерений',
+          'Улучшение стабильности производства',
+        ],
+        heroImage: case3Image,
+      },
+    },
+    // Дублируем кейсы для демонстрации прокрутки (копии 4-6)
+    {
+      id: 'case-7-optimization-copy-2',
+      data: {
+        title: 'ОПТИМИЗАЦИЯ ПРОЦЕССОВ ЧПУ',
+        description: 'Оптимизация производственных процессов с использованием передовых технологий',
+        technologies: ['NX CAM', 'VERICUT', 'Оптимизация процессов'],
+        featured: false,
+        role: 'Ведущий консультант по оптимизации',
+        keyResults: [
+          'Экономия затрат на 22%',
+          'Сокращение времени цикла на 35%',
+          'Повышение стабильности качества деталей',
+        ],
+        heroImage: case1Image,
+      },
+    },
+    {
+      id: 'case-8-efficiency-copy-2',
+      data: {
+        title: 'СРАВНЕНИЕ ЦИКЛОВ ПРОИЗВОДСТВА',
+        description: 'Анализ и оптимизация производственных циклов для повышения эффективности',
+        technologies: ['Анализ данных', 'Оптимизация', 'Производство'],
+        featured: false,
+        role: 'Специалист по оптимизации производства',
+        keyResults: [
+          'Сокращение цикла на 30%',
+          'Улучшение качества продукции',
+          'Снижение брака на 15%',
+        ],
+        heroImage: case2Image,
+      },
+    },
+    {
+      id: 'case-9-quality-copy-2',
+      data: {
+        title: 'КОНТРОЛЬ КАЧЕСТВА И СНИЖЕНИЕ БРАКА',
+        description: 'Внедрение системы контроля качества для снижения брака продукции',
+        technologies: ['CMM', 'Контроль качества', 'Метрология'],
+        featured: false,
+        role: 'Инженер по контролю качества',
+        keyResults: [
+          'Снижение брака с 15% до 0.5%',
+          'Повышение точности измерений',
+          'Улучшение стабильности производства',
+        ],
+        heroImage: case3Image,
+      },
+    },
+  ];
+}
+
+// Для навигации рендерим все кейсы, но скрипт будет показывать только 3 за раз
+// Это позволяет прокручивать все карточки
+// ВАЖНО: Если кейсов меньше 6, добавляем копии для демонстрации прокрутки
+let cases = [...allCasesList];
+if (cases.length > 0 && cases.length < 9) {
+  // Дублируем кейсы для демонстрации прокрутки
+  const originalCases = [...cases];
+  // Добавляем копии до 9 карточек
+  while (cases.length < 9) {
+    originalCases.forEach((caseItem) => {
+      if (cases.length < 9) {
+        cases.push({
+          ...caseItem,
+          id: `${caseItem.id}-copy-${Math.floor(cases.length / originalCases.length)}`,
+        });
+      }
+    });
+  }
 }
 
 const allCasesHref = getLocalizedPath('/cases/', lang);
@@ -180,6 +309,12 @@ const allCasesHref = getLocalizedPath('/cases/', lang);
   .cases-grid-nav-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .cases-grid-nav-button:not(:disabled):hover {
+    background-color: var(--color-neutral-100);
+    border-color: var(--color-neutral-400);
   }
 
   .cases-grid-nav-button svg {
@@ -194,6 +329,21 @@ const allCasesHref = getLocalizedPath('/cases/', lang);
     grid-template-columns: repeat(3, 1fr); /* Фиксированно 3 колонки */
     gap: var(--spacing-24); /* Gap: var(spacing.24) */
     width: 100%;
+    position: relative;
+  }
+
+  /* Анимация для карточек при навигации */
+  .cases-grid-container .case-card {
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    will-change: opacity, transform;
+  }
+
+  /* Скрытые карточки */
+  .cases-grid-container .case-card[data-hidden="true"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 
   .cases-empty {
@@ -273,12 +423,22 @@ const allCasesHref = getLocalizedPath('/cases/', lang);
         <Button href={allCasesHref} variant="outline" size="md">
           Все кейсы
         </Button>
-        <button class="cases-grid-nav-button" aria-label="Предыдущий кейс" disabled>
+        <button 
+          class="cases-grid-nav-button" 
+          aria-label="Предыдущий кейс"
+          id="cases-nav-prev"
+          data-total-cases={allCasesList.length}
+        >
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
-        <button class="cases-grid-nav-button" aria-label="Следующий кейс" disabled>
+        <button 
+          class="cases-grid-nav-button" 
+          aria-label="Следующий кейс"
+          id="cases-nav-next"
+          data-total-cases={allCasesList.length}
+        >
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
@@ -287,21 +447,42 @@ const allCasesHref = getLocalizedPath('/cases/', lang);
     </div>
 
     {/* Grid Container */}
-    <div class="cases-grid-container">
+    <div class="cases-grid-container" id="cases-grid-container" data-current-index="0" data-total-cases={allCasesList.length}>
       {cases.length > 0 ? (
-        cases.map((caseItem) => {
+        cases.map((caseItem, index) => {
           // Определяем href только если это реальный кейс из Content Collections
-          const caseHref = caseItem.id && caseItem.id.startsWith('case-') 
+          // Исключаем моковые кейсы (которые имеют простые ID типа 'case-1', 'case-2')
+          const isMockCase = caseItem.id === 'case-1' || caseItem.id === 'case-2' || caseItem.id === 'case-3';
+          const caseHref = caseItem.id && !isMockCase
             ? getLocalizedPath(`/cases/${getIdSlug(caseItem.id)}`, lang)
             : undefined;
           
           // Преобразуем строковый путь в ImageMetadata
           let caseImage: ImageMetadata | string | undefined = undefined;
+          
+          // Сначала проверяем, есть ли heroImage в данных кейса
           if (caseItem.data.heroImage) {
             // Если это строка с путем, пытаемся найти в imageMap
             if (typeof caseItem.data.heroImage === 'string') {
-              caseImage = imageMap[caseItem.data.heroImage] || caseItem.data.heroImage;
+              // Проверяем точное совпадение и совпадение по имени файла
+              const heroImagePath = caseItem.data.heroImage;
+              caseImage = imageMap[heroImagePath];
+              
+              // Если не нашли точное совпадение, проверяем по имени файла
+              if (!caseImage) {
+                if (heroImagePath.includes('case-1') || heroImagePath.includes('case-1.jpg')) {
+                  caseImage = case1Image;
+                } else if (heroImagePath.includes('case-2') || heroImagePath.includes('case-2.jpg')) {
+                  caseImage = case2Image;
+                } else if (heroImagePath.includes('case-3') || heroImagePath.includes('case-3.jpg')) {
+                  caseImage = case3Image;
+                } else {
+                  // Если не нашли, используем строку как есть (для remote images)
+                  caseImage = heroImagePath;
+                }
+              }
             } else {
+              // Если это уже ImageMetadata, используем напрямую
               caseImage = caseItem.data.heroImage;
             }
           } else {
@@ -315,6 +496,38 @@ const allCasesHref = getLocalizedPath('/cases/', lang);
             }
           }
           
+          // Гарантируем, что изображение установлено для известных кейсов
+          if (!caseImage) {
+            // Fallback: пытаемся определить по ID
+            const caseId = caseItem.id?.toLowerCase() || '';
+            if (caseId.includes('case-1') || caseId.includes('optimization')) {
+              caseImage = case1Image;
+            } else if (caseId.includes('case-2') || caseId.includes('efficiency')) {
+              caseImage = case2Image;
+            } else if (caseId.includes('case-3') || caseId.includes('quality')) {
+              caseImage = case3Image;
+            }
+          }
+          
+          // Отладка для всех кейсов
+          if (import.meta.env.DEV) {
+            console.log(`[CasesGrid] Rendering Case ${index + 1}:`, {
+              id: caseItem.id,
+              title: caseItem.data.title,
+              hasImage: !!caseImage,
+              imageType: caseImage ? (typeof caseImage === 'string' ? 'string' : 'ImageMetadata') : 'undefined',
+              heroImage: caseItem.data.heroImage,
+              hasRole: !!caseItem.data.role,
+              hasKeyResults: !!caseItem.data.keyResults?.length,
+            });
+          }
+          
+          // Убеждаемся, что все обязательные поля присутствуют
+          if (!caseItem.data.title) {
+            console.warn(`[CasesGrid] Case ${index + 1} (${caseItem.id}) missing title`);
+            return null;
+          }
+          
           return (
             <CaseCard
               lang={lang}
@@ -325,13 +538,261 @@ const allCasesHref = getLocalizedPath('/cases/', lang);
               href={caseHref}
               featured={caseItem.data.featured}
               role={caseItem.data.role}
-              keyResults={caseItem.data.keyResults}
+              keyResults={caseItem.data.keyResults || []}
             />
           );
-        })
+        }).filter(Boolean)
       ) : (
         <p class="cases-empty">Пока нет опубликованных кейсов.</p>
       )}
     </div>
   </div>
 </section>
+
+<script define:vars={{ totalCases: cases.length }} is:inline>
+  // Навигация по карточкам кейсов
+  // ВАЖНО: inline скрипты должны быть на чистом JavaScript (без TypeScript синтаксиса)
+  console.log('[CasesGrid] Script loaded, totalCases:', totalCases);
+  
+  function initCasesNavigation() {
+    console.log('[CasesGrid] initCasesNavigation called');
+    
+    const container = document.getElementById('cases-grid-container');
+    const prevButton = document.getElementById('cases-nav-prev');
+    const nextButton = document.getElementById('cases-nav-next');
+    
+    console.log('[CasesGrid] Elements found:', {
+      container: !!container,
+      prevButton: !!prevButton,
+      nextButton: !!nextButton,
+      totalCases: totalCases
+    });
+    
+    if (!container || !prevButton || !nextButton) {
+      console.error('[CasesGrid] Navigation elements not found!', {
+        container: !!container,
+        prevButton: !!prevButton,
+        nextButton: !!nextButton,
+        totalCases: totalCases
+      });
+      return;
+    }
+    
+    const visibleCount = 3; // Показываем 3 карточки за раз
+    let currentIndex = parseInt(container.dataset.currentIndex || '0', 10);
+    
+    console.log('[CasesGrid] Initializing navigation', {
+      totalCases: totalCases,
+      currentIndex: currentIndex,
+      containerChildren: container.children.length
+    });
+    
+    // Функция для обновления отображаемых карточек
+    function updateVisibleCases() {
+      // Ищем все карточки
+      var allCards = Array.from(container.querySelectorAll('.case-card'));
+      var cards = allCards.length > 0 
+        ? allCards 
+        : Array.from(container.children).filter(function(child) {
+            return child && child.nodeType === 1;
+          });
+      
+      var startIndex = currentIndex;
+      var endIndex = Math.min(startIndex + visibleCount, totalCases);
+      
+      // Определяем направление движения
+      var lastIndex = parseInt(container.dataset.lastIndex || '0', 10);
+      var isMovingForward = currentIndex > lastIndex || (currentIndex === 0 && lastIndex >= totalCases - visibleCount);
+      container.dataset.lastIndex = currentIndex.toString();
+      
+      var animationDuration = 0.5;
+      var staggerDelay = 100;
+      
+      console.log('[CasesGrid] Updating', {
+        currentIndex: currentIndex,
+        lastIndex: lastIndex,
+        isMovingForward: isMovingForward,
+        cardsCount: cards.length,
+        startIndex: startIndex,
+        endIndex: endIndex,
+        totalCases: totalCases
+      });
+      
+      // Обрабатываем все карточки с анимацией карусели
+      cards.forEach(function(card, index) {
+        if (!card || !card.style) {
+          console.warn('[CasesGrid] Invalid card at index', index, card);
+          return;
+        }
+        
+        var shouldShow = index >= startIndex && index < endIndex;
+        var wasVisible = !card.hasAttribute('data-hidden');
+        var positionInView = index - startIndex;
+        var positionInOldView = index - lastIndex;
+        
+        console.log('[CasesGrid] Card', index, {
+          shouldShow: shouldShow,
+          wasVisible: wasVisible,
+          positionInView: positionInView
+        });
+        
+        if (shouldShow) {
+          // Показываем карточку
+          card.removeAttribute('data-hidden');
+          
+          if (!wasVisible) {
+            // Новая карточка - показываем с анимацией
+            card.style.display = '';
+            card.style.visibility = 'visible';
+            card.style.pointerEvents = 'auto';
+            
+            // Устанавливаем transition
+            card.style.transition = 'opacity ' + animationDuration + 's ease, transform ' + animationDuration + 's ease';
+            
+            // Начальное состояние (вне экрана)
+            var startX = isMovingForward ? '200px' : '-200px';
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(' + startX + ')';
+            
+            // Анимируем с задержкой (stagger эффект)
+            var delay = positionInView * staggerDelay;
+            setTimeout(function() {
+              if (card && card.style) {
+                card.style.opacity = '1';
+                card.style.transform = 'translateX(0)';
+                console.log('[CasesGrid] Card', index, 'appeared');
+              }
+            }, delay);
+          } else {
+            // Уже видна - просто обновляем
+            card.style.opacity = '1';
+            card.style.transform = 'translateX(0)';
+          }
+        } else {
+          // Скрываем карточку
+          if (wasVisible) {
+            // Анимируем исчезновение
+            var disappearDelay = Math.abs(positionInOldView) * staggerDelay;
+            var endX = isMovingForward ? '-200px' : '200px';
+            
+            card.style.transition = 'opacity ' + animationDuration + 's ease, transform ' + animationDuration + 's ease';
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(' + endX + ')';
+            
+            // Скрываем после анимации
+            setTimeout(function() {
+              if (card && card.style) {
+                card.setAttribute('data-hidden', 'true');
+                card.style.display = 'none';
+                card.style.visibility = 'hidden';
+                card.style.pointerEvents = 'none';
+                console.log('[CasesGrid] Card', index, 'hidden');
+              }
+            }, disappearDelay + (animationDuration * 1000) + 50);
+          } else {
+            // Уже скрыта
+            card.setAttribute('data-hidden', 'true');
+            card.style.display = 'none';
+          }
+        }
+      });
+      
+      // Логируем информацию
+      var visibleCards = cards.filter(function(card, index) {
+        return index >= startIndex && index < endIndex;
+      });
+      console.log('[CasesGrid] Visible cards:', visibleCards.length, 'out of', cards.length, '| Index:', currentIndex);
+      
+      // Обновляем состояние кнопок
+      if (totalCases <= visibleCount) {
+        newPrevButton.disabled = true;
+        newNextButton.disabled = true;
+      } else {
+        // Для циклической прокрутки кнопки всегда активны
+        newPrevButton.disabled = false;
+        newNextButton.disabled = false;
+      }
+      
+      // Обновляем индекс в data-атрибуте
+      container.dataset.currentIndex = currentIndex.toString();
+    }
+    
+    // Удаляем старые обработчики через клонирование кнопок
+    var newPrevButton = prevButton.cloneNode(true);
+    var newNextButton = nextButton.cloneNode(true);
+    prevButton.parentNode.replaceChild(newPrevButton, prevButton);
+    nextButton.parentNode.replaceChild(newNextButton, nextButton);
+    
+    // Обработчики кликов
+    newPrevButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('[CasesGrid] ⬅️ Prev button clicked!', { 
+        currentIndex: currentIndex, 
+        totalCases: totalCases,
+        disabled: newPrevButton.disabled
+      });
+      
+      if (totalCases <= visibleCount) {
+        console.log('[CasesGrid] Not enough cases for navigation');
+        return;
+      }
+      
+      if (currentIndex > 0) {
+        currentIndex = Math.max(0, currentIndex - visibleCount);
+        console.log('[CasesGrid] Moving to index:', currentIndex);
+        updateVisibleCases();
+      } else {
+        // Циклическая прокрутка: переходим к концу
+        currentIndex = Math.max(0, totalCases - visibleCount);
+        console.log('[CasesGrid] Cycling to end, index:', currentIndex);
+        updateVisibleCases();
+      }
+    });
+    
+    newNextButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('[CasesGrid] ➡️ Next button clicked!', { 
+        currentIndex: currentIndex, 
+        totalCases: totalCases,
+        disabled: newNextButton.disabled
+      });
+      
+      if (totalCases <= visibleCount) {
+        console.log('[CasesGrid] Not enough cases for navigation');
+        return;
+      }
+      
+      var maxIndex = Math.max(0, totalCases - visibleCount);
+      if (currentIndex < maxIndex) {
+        currentIndex = Math.min(maxIndex, currentIndex + visibleCount);
+        console.log('[CasesGrid] Moving to index:', currentIndex);
+        updateVisibleCases();
+      } else {
+        // Циклическая прокрутка: возвращаемся к началу
+        currentIndex = 0;
+        console.log('[CasesGrid] Cycling to start, index:', currentIndex);
+        updateVisibleCases();
+      }
+    });
+    
+    console.log('[CasesGrid] Event listeners attached to buttons');
+    
+    // Инициализация
+    updateVisibleCases();
+  }
+  
+  // Инициализация при загрузке страницы
+  if (typeof window !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCasesNavigation);
+    } else {
+      initCasesNavigation();
+    }
+    
+    // Инициализация при навигации (View Transitions)
+    window.addEventListener('astro:page-load', initCasesNavigation);
+    document.addEventListener('astro:after-swap', initCasesNavigation);
+  }
+</script>

@@ -96,6 +96,7 @@ const finalCtaHref = ctaHref || defaultCtaHref;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-32); /* Gap: var(spacing.32) */
+    align-items: flex-start; /* Выравнивание влево */
   }
 
   /* Title: Heading/XL */
@@ -129,6 +130,16 @@ const finalCtaHref = ctaHref || defaultCtaHref;
     color: var(--text-secondary); /* var(Tokens.Text.text-secondary) */
     max-width: 600px;
     margin: 0;
+  }
+
+  /* Button Wrapper: Фиксированная ширина и выравнивание влево */
+  .hero-button-wrapper {
+    width: 170px;
+  }
+
+  .hero-button-wrapper :global(button),
+  .hero-button-wrapper :global(a) {
+    width: 100%;
   }
 
   /* Responsive */
@@ -228,9 +239,11 @@ const finalCtaHref = ctaHref || defaultCtaHref;
 
     {/* Button: Инстанс компонента Button */}
     {ctaText && (
-      <Button href={finalCtaHref} variant="primary" size="md">
-        {ctaText}
-      </Button>
+      <div class="hero-button-wrapper">
+        <Button href={finalCtaHref} variant="primary" size="md">
+          {ctaText}
+        </Button>
+      </div>
     )}
   </div>
 </section>
